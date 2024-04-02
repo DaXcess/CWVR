@@ -238,7 +238,23 @@ public class Plugin : BaseUnityPlugin
         var manifest = Path.Combine(openXr, "UnitySubsystemsManifest.json");
         if (!File.Exists(manifest))
         {
-            File.WriteAllText(manifest, "TODO: Create manifest resource file");
+            File.WriteAllText(manifest, """
+                                        {
+                                                "name": "OpenXR XR Plugin",
+                                                "version": "1.8.2",
+                                                "libraryName": "UnityOpenXR",
+                                                "displays": [
+                                                        {
+                                                                "id": "OpenXR Display"
+                                                        }
+                                                ],
+                                                "inputs": [
+                                                        {
+                                                                "id": "OpenXR Input"
+                                                        }
+                                                ]
+                                        }
+                                        """);
             mustRestart = true;
         }
 
