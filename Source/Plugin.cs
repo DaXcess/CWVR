@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using BepInEx;
+using CWVR.Patches;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR;
@@ -26,8 +27,6 @@ public class Plugin : BaseUnityPlugin
     private void Awake()
     {
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-        InputSystem.PerformDefaultPluginInitialization();
-        
         CWVR.Logger.SetSource(Logger);
 
         if (!LoadEarlyRuntimeDependencies())
@@ -35,6 +34,8 @@ public class Plugin : BaseUnityPlugin
             Logger.LogError("Disabling mod because required runtime dependencies could not be loaded!");
             return;
         }
+        
+        InputSystem.PerformDefaultPluginInitialization();
         
         // TODO: Load AssetBundles here
 
@@ -45,7 +46,9 @@ public class Plugin : BaseUnityPlugin
             // TODO: Hijack splash screen
         }
         
-        // TODO: Insert universal patches here
+        HarmonyPatcher.PatchUniversal();
+        Logger.LogInfo("Inserted Universal patches using Harmony");
+        
         // TODO: Maybe force window focus
     }
 
@@ -109,7 +112,8 @@ public class Plugin : BaseUnityPlugin
             return false;
         }
         
-        // TODO: Insert Harmony patches for VR here
+        HarmonyPatcher.PatchVR();
+        Logger.LogInfo("Inserted VR patches using Harmony");
         
         return true;
     }
