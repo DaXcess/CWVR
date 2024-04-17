@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using BepInEx;
+using CWVR.Assets;
 using CWVR.Patches;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR;
@@ -15,41 +15,56 @@ using UnityEngine.XR.OpenXR.Features.Interactions;
 
 namespace CWVR;
 
+[ContentWarningPlugin(PLUGIN_GUID, PLUGIN_VERSION, true)]
 [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
 public class Plugin : BaseUnityPlugin
 {
     private const string PLUGIN_GUID = "io.daxcess.cwvr";
     private const string PLUGIN_NAME = "CWVR";
     private const string PLUGIN_VERSION = "0.0.1";
-
-    public static Flags Flags { get; private set; } = 0;
     
+    private const string BANNER = "                             ,--.,--.                         \n ,-----.,--.   ,--.         /  //  /     ,--.   ,--.,------.  \n'  .--./|  |   |  |        /  //  /       \\  `.'  / |  .--. ' \n|  |    |  |.'.|  |       /  //  /         \\     /  |  '--'.' \n'  '--'\\|   ,'.   |      /  //  /           \\   /   |  |\\  \\  \n `-----''--'   '--'     /  //  /             `-'    `--' '--' \n                       `--'`--'                               \n\n             ___________________________ \n            < Another VR mod by DaXcess >\n             --------------------------- \n                    \\   ^__^\n                     \\  (oo)\\_______\n                        (__)\\       )\\/\\\n                            ||----w |\n                            ||     ||\n";
+
+    public new static Config Config { get; private set; }
+    public static Flags Flags { get; private set; } = 0;
+
     private void Awake()
     {
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
         CWVR.Logger.SetSource(Logger);
 
+        Config = new Config(base.Config);
+        
+        foreach (var line in BANNER.Split('\n'))
+            Logger.LogInfo($"   {line}");
+
+        var disableVr = Config.DisableVR.Value || Environment.GetCommandLineArgs()
+            .Contains("--disable-vr", StringComparer.InvariantCultureIgnoreCase);
+        
+        if (disableVr)
+            Logger.LogWarning("VR has been disabled by config or the `--disable-vr` command line flag");
+        
         if (!LoadEarlyRuntimeDependencies())
         {
             Logger.LogError("Disabling mod because required runtime dependencies could not be loaded!");
             return;
         }
-        
-        InputSystem.PerformDefaultPluginInitialization();
-        
-        // TODO: Load AssetBundles here
 
-        if (InitializeVR())
+        if (!AssetManager.LoadAssets())
         {
-            Flags |= Flags.VR;
-            
-            // TODO: Hijack splash screen
+            Logger.LogError("Disabling mod because assets could not be loaded!");
+            // return;
         }
-        
+
         HarmonyPatcher.PatchUniversal();
         Logger.LogInfo("Inserted Universal patches using Harmony");
-        
-        // TODO: Maybe force window focus
+
+        if (disableVr || !InitializeVR())
+            return;
+
+        // Perform global VR setup here
+
+        Flags |= Flags.VR;
     }
 
     private bool LoadEarlyRuntimeDependencies()
