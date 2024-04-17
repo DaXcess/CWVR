@@ -18,20 +18,30 @@
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
-    <PackageReference Include="ContentWarning" Version="1.6.2" />
+    <PackageReference Include="ContentWarning" Version="1.9.0" />
+    <PackageReference Include="CW.Zorro" Version="1.8.0" />
+    <PackageReference Include="HBAO.Universal" Version="1.9.0-cw" />
+    <PackageReference Include="PhotonUnityNetworking" Version="1.0.0-cw" />
+    <PackageReference Include="Unity.Animation.Rigging" Version="1.2.1" />
     <PackageReference Include="Unity.InputSystem" Version="1.7.0" />
+    <PackageReference Include="Unity.Mathematics" Version="1.3.1" />
+    <PackageReference Include="Unity.RenderPipelines.Core" Version="14.0.8" />
+    <PackageReference Include="Unity.RenderPipelines.Universal" Version="14.0.8" />
+    <PackageReference Include="Unity.TextMeshPro" Version="3.0.6" />
     <PackageReference Include="Unity.XR.CoreUtils" Version="2.2.3" />
     <PackageReference Include="Unity.XR.Interaction.Toolkit" Version="2.5.3" />
     <PackageReference Include="Unity.XR.Management" Version="4.4.1" />
     <PackageReference Include="Unity.XR.OpenXR" Version="1.8.2" />
     <PackageReference Include="UnityEngine.Modules" Version="2022.3.10" IncludeAssets="compile" />
     <PackageReference Include="UnityEngine.SpatialTracking" Version="2.1.10" />
+    <PackageReference Include="UnityEngine.UI" Version="1.0.0" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2"
+      PrivateAssets="all" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
     <None Include="LICENSE" Pack="true" PackagePath="\" />
