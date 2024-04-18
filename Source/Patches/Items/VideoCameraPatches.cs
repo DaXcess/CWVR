@@ -5,8 +5,7 @@ using UnityEngine;
 
 namespace CWVR.Patches.Items;
 
-// TODO: Remove Universal
-[CWVRPatch(CWVRPatchTarget.Universal)]
+[CWVRPatch]
 [HarmonyPatch]
 internal static class VideoCameraPatches
 {
@@ -42,10 +41,6 @@ internal static class VideoCameraPatches
     [HarmonyPrefix]
     private static void BeforeUpdate(VideoCamera __instance)
     {
-        // TODO: Remove
-        if (!VRSession.InVR)
-            return;
-        
         var controls = VRSession.Instance.Controls;
         
         if (!__instance.isHeldByMe || !GlobalInputHandler.CanTakeInput())

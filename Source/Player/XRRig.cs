@@ -7,6 +7,8 @@ public class XRRig : MonoBehaviour
 {
     private const float WORLD_SCALE = 1.25f;
 
+    private readonly Collider[] cameraClipCollider = new Collider[1];
+
     public Camera Camera { get; private set; }
 
     // Controllers
@@ -96,6 +98,16 @@ public class XRRig : MonoBehaviour
             heightOffset = off;
         else
             heightOffset = -cameraTracker.GetPoseData().position.y;
+    }
+    
+    private void Update()
+    {
+        // Prevent clipping the camera through walls etc
+        if (Physics.OverlapBoxNonAlloc(Camera.transform.position, Vector3.one * 0.1f, cameraClipCollider,
+                Quaternion.identity, 1 << 9) > 0)
+        {
+            OriginOffset = -Camera.transform.localPosition.XZ();
+        }
     }
 
     private void LateUpdate()
