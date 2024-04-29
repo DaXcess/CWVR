@@ -147,11 +147,5 @@ public class Controls(InputSystem inputSystem)
         input.dropItemWasReleased = Drop.Released();
         input.dropItemIsPressed = Drop.Pressed();
         input.toggleCameraFlipWasPressed = FlipCamera.PressedDown();
-
-        // TODO: Check these
-        input.aimWasPressed = GlobalInputHandler.GetKeyDown(KeyCode.Mouse1);
-        input.aimIsPressed = GlobalInputHandler.GetKey(KeyCode.Mouse1);
-        input.emoteWasPressed = GlobalInputHandler.EmoteKey.GetKeyDown();
-        input.emoteIsPressed = GlobalInputHandler.EmoteKey.GetKey();
     }
 }

@@ -1,8 +1,5 @@
 # Content Warning VR Mod
 
-> [!WARNING]
-> This mod is not finished. While playable, expect stuff to straight up not work or break.
-
 CW // VR is a [BepInEx](https://docs.bepinex.dev/) mod that adds fully fledged, 6DOF VR support into Content Warning, including fully motion controlled hands.
 
 This mod, just like my Lethal Company VR mod, is powered by Unity's OpenXR plugin, and is thereby compatible with a wide range of headsets and runtimes, like Oculus, Virtual Desktop, SteamVR and many more!
