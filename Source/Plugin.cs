@@ -53,7 +53,7 @@ public class Plugin : BaseUnityPlugin
         if (!AssetManager.LoadAssets())
         {
             Logger.LogError("Disabling mod because assets could not be loaded!");
-            // return;
+            return;
         }
 
         HarmonyPatcher.PatchUniversal();

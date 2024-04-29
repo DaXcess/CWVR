@@ -4,24 +4,12 @@ namespace CWVR.Player;
 
 public class VRPlayer : MonoBehaviour
 {
-    private const float ROOMSCALE_MOVEMENT_THRESHOLD = 0.005f;
-    
     private global::Player player;
     private IKRigHandler rigHandler;
     
     public XRRig Rig { get; private set; }
     
     public Interactor PrimaryInteractor { get; private set; }
-    
-    public bool IsRoomscaleMoving {
-        get
-        {
-            var hipPos = player.refs.ragdoll.GetBodypart(BodypartType.Hip).transform.position.XZ();
-            var camPos = Rig.Camera.transform.position.XZ();
-            
-            return (hipPos - camPos).sqrMagnitude > 0.15f;
-        }
-    }
     
     private Vector3 Position => player.refs.cameraPos.position;
     
@@ -53,8 +41,10 @@ public class VRPlayer : MonoBehaviour
     private void FixedUpdate()
     {
         // Set animation rig weights
-        player.refs.IK_Left.weight = 1;
-        player.refs.IK_Right.weight = 1;
+        var weight = player.data.dead ? 0 : 1;
+        
+        player.refs.IK_Left.weight = weight;
+        player.refs.IK_Right.weight = weight;
     }
 
     private void LateUpdate()
@@ -91,8 +81,8 @@ public class VRPlayer : MonoBehaviour
     /// </summary>
     private void UpdateTurning()
     {
-        // Don't allow rotating while in ragdoll
-        if (player.Ragdoll())
+        // Don't allow rotating while in ragdoll, but do allow when spectating
+        if (player.Ragdoll() && !Spectate.spectating)
             return;
         
         var controls = VRSession.Instance.Controls;
@@ -124,6 +114,9 @@ public class VRPlayer : MonoBehaviour
     /// </summary>
     private void UpdateIK()
     {
+        if (player.data.dead || player.data.bed is not null)
+            return;
+        
         rigHandler.SetLeftHandPosition(Rig.LeftHand.position, Rig.LeftHand.rotation);
         rigHandler.SetRightHandPosition(Rig.RightHand.position, Rig.RightHand.rotation);
 

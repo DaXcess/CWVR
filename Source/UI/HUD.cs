@@ -107,6 +107,13 @@ public class HUD : MonoBehaviour
         hotbar.localEulerAngles = new Vector3(0, 0, 270);
         hotbar.localScale = Vector3.one * 2.5f;
         
+        // Helmet Messages
+        var helmetMessage = uiSource.Find("HelmetMessage");
+        var moneyAddedContainer = uiSource.parent.Find("MoneyAdded");
+
+        helmetMessage.localPosition = new Vector3(0, 150, -225);
+        moneyAddedContainer.localPosition = new Vector3(260, -115, -100);
+        
         // Modal
         modalCanvas = Modal.Instance.GetComponent<Canvas>();
         modalCanvas.worldCamera = VRSession.Instance.MainCamera;
@@ -115,8 +122,18 @@ public class HUD : MonoBehaviour
         modalCanvas.gameObject.SetLayerRecursive(6);
         modalCanvas.transform.Find("Image").localScale = Vector3.one * 10;
         
+        // Disable leftover UI
+        uiSource.parent.Find("Edge").gameObject.SetActive(false);
+        uiSource.Find("NextStep").gameObject.SetActive(false);
+        uiSource.Find("LINE").gameObject.SetActive(false);
+        uiSource.Find("LINE (1)").gameObject.SetActive(false);
+        uiSource.Find("EmoteUI").gameObject.SetActive(false);
+        
         // Pause menu
         PauseMenu = EscapeMenu.Instance.m_menu.gameObject.AddComponent<PauseMenu>();
+        
+        // Player Customizer (if applicable)
+        FindObjectOfType<PlayerCustomizer>()?.gameObject.AddComponent<Customizer>();
         
         ReplaceSettings(interactionUi, stamina, oxygen, health, hotbar);
         CreateUICamera();

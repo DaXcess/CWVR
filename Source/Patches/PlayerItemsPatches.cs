@@ -58,10 +58,21 @@ internal static class UniversalPlayerItemsPatches
     [HarmonyPrefix]
     private static bool BeforeFixedUpdate(PlayerItems __instance)
     {
-        // Allow while loading VR session
-        if (!VRSession.Instance)
+        // Don't care about flatscreen
+        if (!__instance.player.InVR())
             return true;
-        
-        return !VRSession.InVR && !VRSession.Instance.NetworkManager.InVR(__instance.player);
+
+        // We're done if we're holding nothing
+        if (!__instance.player.data.currentItem)
+            return false;
+
+        // Force update item transforms to be the same as the hand (instead of having a hardcoded value like in flatscreen)
+        var itemTarget = __instance.player.data.currentItem.itemBody.animationTarget.transform;
+        var handTarget = __instance.player.refs.ragdoll.GetBodypart(BodypartType.Hand_R).animationTarget.transform;
+
+        itemTarget.position = handTarget.position;
+        itemTarget.rotation = handTarget.rotation;
+
+        return false;
     }
 }

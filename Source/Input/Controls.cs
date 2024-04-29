@@ -36,14 +36,17 @@ public class Controls(InputSystem inputSystem)
 
     public ButtonControl Menu { get; } =
         inputSystem.RegisterButtonControl(XRController.Left, InputHelpers.Button.PrimaryButton);
-    
+
+    public ButtonControl ResetHeight { get; } =
+        inputSystem.RegisterButtonControl(XRController.Left, InputHelpers.Button.SecondaryButton);
+
     public DirectionalAxisControl ZoomIn { get; } = inputSystem.RegisterDirectionalAxisControl(XRController.Right,
         InputHelpers.Axis2D.PrimaryAxis2D, DirectionalAxisControl.AxisDirection.Up);
 
     public DirectionalAxisControl ZoomOut { get; } = inputSystem.RegisterDirectionalAxisControl(XRController.Right,
         InputHelpers.Axis2D.PrimaryAxis2D, DirectionalAxisControl.AxisDirection.Down);
 
-    
+
     // Turning
 
     public DirectionalAxisControl TurnLeft { get; } =
@@ -65,7 +68,19 @@ public class Controls(InputSystem inputSystem)
     public ButtonControl ModalPress { get; } = inputSystem.RegisterButtonControl(XRController.Right,
         InputHelpers.Button.PrimaryButton);
 
+    // Spectating
+
+    public Axis2DControl Pivot { get; } =
+        inputSystem.RegisterAxis2DControl(XRController.Left, InputHelpers.Axis2D.PrimaryAxis2D);
+
+    public ButtonControl SpectateNext { get; } =
+        inputSystem.RegisterButtonControl(XRController.Right, InputHelpers.Button.TriggerButton);
+
+    public ButtonControl SpectatePrevious { get; } =
+        inputSystem.RegisterButtonControl(XRController.Left, InputHelpers.Button.TriggerButton);
+
     private bool toggleSprintState;
+    private float timeNotMoved;
 
     public void SampleInput(global::Player.PlayerInput input, global::Player.PlayerData data, global::Player player)
     {
@@ -82,6 +97,11 @@ public class Controls(InputSystem inputSystem)
             input.movementInput =
                 Vector2.Lerp(input.movementInput, data.overrideMovementInput, data.inputOverideAmount);
 
+        if (input.movementInput == Vector2.zero)
+            timeNotMoved += Time.deltaTime;
+        else
+            timeNotMoved = 0;
+
         input.escapeWasPressed = Menu.PressedDown();
 
         if (data.inputOverideAmount > 0.99f)
@@ -89,9 +109,16 @@ public class Controls(InputSystem inputSystem)
 
         if (!player.HasLockedMovement())
         {
-            if (Plugin.Config.ToggleSprint.Value && Sprint.PressedDown())
+            if (Plugin.Config.ToggleSprint.Value)
             {
-                toggleSprintState = !toggleSprintState;
+                if (Sprint.PressedDown())
+                    toggleSprintState = !toggleSprintState;
+
+                if (player.data.staminaDepleated ||
+                    (input.movementInput.y <= 0.1f && !player.refs.controller.canSprintInAnyDirection) ||
+                    timeNotMoved > Plugin.Config.ToggleSprintTimer.Value)
+                    toggleSprintState = false;
+
                 input.sprintIsPressed = toggleSprintState;
             }
             else
@@ -120,19 +147,11 @@ public class Controls(InputSystem inputSystem)
         input.dropItemWasReleased = Drop.Released();
         input.dropItemIsPressed = Drop.Pressed();
         input.toggleCameraFlipWasPressed = FlipCamera.PressedDown();
-        
+
         // TODO: Check these
         input.aimWasPressed = GlobalInputHandler.GetKeyDown(KeyCode.Mouse1);
         input.aimIsPressed = GlobalInputHandler.GetKey(KeyCode.Mouse1);
         input.emoteWasPressed = GlobalInputHandler.EmoteKey.GetKeyDown();
         input.emoteIsPressed = GlobalInputHandler.EmoteKey.GetKey();
-    }
-
-    /// <summary>
-    /// This function is used to stop sprinting if toggle sprint is enabled, for example when standing still for too long
-    /// </summary>
-    public void StopSprinting()
-    {
-        toggleSprintState = false;
     }
 }

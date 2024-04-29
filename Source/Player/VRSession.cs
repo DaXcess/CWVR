@@ -3,6 +3,7 @@ using CWVR.Input;
 using CWVR.Networking;
 using CWVR.UI;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace CWVR.Player;
 
@@ -49,7 +50,10 @@ public class VRSession : MonoBehaviour
         LocalPlayer = global::Player.localPlayer.gameObject.AddComponent<VRPlayer>();
         
         // Create HUD
-        HUD = gameObject.AddComponent<HUD>();
+        HUD = gameObject.AddComponent<HUD>();        
+        
+        // Add VR settings to pause menu
+        FindObjectOfType<EscapeMenuSettingsPage>(true).gameObject.AddComponent<UI.Settings.SettingsMenu>();
     }
 
     private void OnDestroy()

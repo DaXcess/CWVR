@@ -23,7 +23,7 @@ public class Interactor : MonoBehaviour
         debugLineRenderer.shadowBias = 0.5f;
         debugLineRenderer.useWorldSpace = true;
         debugLineRenderer.maskInteraction = SpriteMaskInteraction.None;
-        debugLineRenderer.SetMaterials([AssetManager.whiteMat]);
+        debugLineRenderer.SetMaterials([AssetManager.WhiteMat]);
         debugLineRenderer.enabled = false;
     }
 

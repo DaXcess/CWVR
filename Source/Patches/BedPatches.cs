@@ -14,8 +14,10 @@ internal static class BedPatches
         var player = PlayerHandler.instance.TryGetPlayerFromViewID(playerID);
         if (player != global::Player.localPlayer)
             return;
+
+        var rig = VRSession.Instance.LocalPlayer.Rig;
         
-        VRSession.Instance.LocalPlayer.Rig.ResetHeight(0);
+        rig.ResetHeight(0);
     }
     
     /// <summary>

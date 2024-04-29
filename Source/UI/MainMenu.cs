@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using CWVR.Assets;
+using Microsoft.MixedReality.Toolkit.Experimental.UI;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -54,12 +55,35 @@ public class MainMenu : MonoBehaviour
         mainMenuCanvas.transform.position = modalCanvas.transform.position = introCanvas.transform.position;
         mainMenuCanvas.transform.rotation = modalCanvas.transform.rotation = introCanvas.transform.rotation;
         
+        // Set resolution on all canvasses
+        introCanvas.GetComponent<RectTransform>().sizeDelta = new Vector2(1920, 1080);
+        mainMenuCanvas.GetComponent<RectTransform>().sizeDelta = new Vector2(1920, 1080);
+        modalCanvas.GetComponent<RectTransform>().sizeDelta = new Vector2(1920, 1080);
+        
         // Revert background scale to default
         modalCanvas.transform.Find("Image").localScale = Vector3.one;
         
         // Required for VR UI interactions
         mainMenuCanvas.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
         modalCanvas.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
+
+        // Create keyboard
+        var keyboard = Instantiate(AssetManager.Keyboard).GetComponent<NonNativeKeyboard>();
+        keyboard.SubmitOnEnter = true;
+        keyboard.transform.position = new Vector3(-20.0352f, 4.4452f, 34.5683f);
+        keyboard.transform.eulerAngles = new Vector3(20, 180, 0);
+        keyboard.transform.localScale = Vector3.one * 0.005f;
+
+        var autoKeyboard = mainMenuCanvas.gameObject.AddComponent<AutoKeyboard>();
+        autoKeyboard.keyboard = keyboard;
+        
+        if (Plugin.Config.FirstTimeLaunch.Value)
+        {
+            Modal.Show("Welcome to CW // VR", "Due to the nature of this game, the VR mod might cause more severe motion sickness than usual in some individuals.\nIf you suffer from motion sickness easily, it is recommended to enable \"Reduced Motion Sickness\".\nGoing for the full experience means that the camera can rotate on its own during ragdolls, death, sleeping and certain enemy attacks.\n(You can always change this setting in the VR Settings later).\n\nI wish you happy travels in trying to get SpöökFamous in VR!\n- DaXcess", [
+                new ModalOption("Full Experience", () => Plugin.Config.DisableRagdollCamera.Value = false),
+                new ModalOption("Reduced Motion Sickness", () => Plugin.Config.DisableRagdollCamera.Value = true)
+            ], () => Plugin.Config.FirstTimeLaunch.Value = false);
+        }
 
         StartCoroutine(DisableDoF());
         StartCoroutine(AutoRotate());
@@ -100,7 +124,7 @@ public class MainMenu : MonoBehaviour
         };
         visual.enabled = true;
 
-        renderer.material = AssetManager.whiteMat;
+        renderer.material = AssetManager.WhiteMat;
         
         controller.controllerNode = node;
     }
