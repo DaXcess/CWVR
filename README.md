@@ -11,7 +11,7 @@ This mod, just like my Lethal Company VR mod, is powered by Unity's OpenXR plugi
 
 To install the mod from the source code, you will first have to compile the mod. Instructions for this are available in [COMPILING.md](COMPILING.md).
 
-Next up you'll need to grab a copy of some **Runtime Dependencies**. You can either grab these from [one of the releases](https://github.com/DaXcess/LCVR/releases), or if you truly want the no hand holding experience, you can retrieve them from a Unity project.
+Next up you'll need to grab a copy of some **Runtime Dependencies**. You can either grab these from [one of the releases](https://github.com/DaXcess/CWVR/releases), or if you truly want the no hand holding experience, you can retrieve them from a Unity project.
 
 ## Retrieving Runtime Dependencies from a Unity Project
 
@@ -33,7 +33,7 @@ And from the `<Project Name>_Data/Plugins/x86_64` directory:
 
 ## Install BepInEx
 
-BepInEx is the modloader that CW // VR uses to mod the game. You can download BepInEx from their [GitHub Releases](https://github.com/BepInEx/BepInEx/releases) (LCVR currently targets BepInEx 5.4.22).
+BepInEx is the modloader that CW // VR uses to mod the game. You can download BepInEx from their [GitHub Releases](https://github.com/BepInEx/BepInEx/releases) (CWVR currently targets BepInEx 5.4.22).
 
 To install BepInEx, you can follow their [Installation Gude](https://docs.bepinex.dev/articles/user_guide/installation/index.html#installing-bepinex-1).
 
@@ -43,4 +43,4 @@ Once BepInEx has been installed and run at least once, you can start installing 
 
 First of all, in the `BepInEx/plugins` folder, create a new folder called `CWVR` (doesn't have to be named that specifically, but makes identification easier). Inside this folder, place the `CWVR.dll` file that was generated during the [COMPILING.md](COMPILING.md) steps.
 
-After this has been completed, create a new directory called `RuntimeDeps` (has to be named exactly that) inside of the `CWVR` folder. Inside this folder you will need to put the DLLs that you have retrieved during the [Retrieving Runtime Depenencies](#retrieving-runtime-dependencies-from-a-unity-project) step. You can now run the game with LCVR installed.
+After this has been completed, create a new directory called `RuntimeDeps` (has to be named exactly that) inside of the `CWVR` folder. Inside this folder you will need to put the DLLs that you have retrieved during the [Retrieving Runtime Depenencies](#retrieving-runtime-dependencies-from-a-unity-project) step. You can now run the game with CWVR installed.
