@@ -1,6 +1,5 @@
 using CWVR.Player;
 using HarmonyLib;
-using UnityEngine;
 
 namespace CWVR.Patches;
 
@@ -17,7 +16,7 @@ internal static class PlayerControllerPatches
             return true;
 
         // Don't rotate player if in bed or dead
-        if (__instance.player.data.dead || __instance.player.data.bed is not null)
+        if (__instance.player.data.dead || __instance.player.data.currentBed is not null)
             return true;
         
         var camera = VRSession.Instance.MainCamera.transform;

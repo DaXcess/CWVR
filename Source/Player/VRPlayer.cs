@@ -60,7 +60,7 @@ public class VRPlayer : MonoBehaviour
     {
         var movement = Position.XZ() - prevPlayerPosition;
         var cameraMovement = Vector2.zero;
-
+        
         var desiredCameraPosition = Rig.DesiredCameraPosition.XZ();
 
         if (Vector2.Distance(desiredCameraPosition + new Vector2(movement.x, 0), Rig.Camera.transform.position.XZ()) <
@@ -91,16 +91,16 @@ public class VRPlayer : MonoBehaviour
         {
             case Config.TurnProviderOption.Snap:
                 if (controls.TurnLeft.PressedDown())
-                    Rig.RotateOffset(-Plugin.Config.SnapTurnSize.Value);
+                    Rig.AddRotation(-Plugin.Config.SnapTurnSize.Value);
                 else if (controls.TurnRight.PressedDown())
-                    Rig.RotateOffset(Plugin.Config.SnapTurnSize.Value);
+                    Rig.AddRotation(Plugin.Config.SnapTurnSize.Value);
                 break;
             
             case Config.TurnProviderOption.Smooth:
                 if (controls.TurnLeft.Pressed())
-                    Rig.RotateOffset(-180 * Time.deltaTime * Plugin.Config.SmoothTurnSpeedModifier.Value);
+                    Rig.AddRotation(-180 * Time.deltaTime * Plugin.Config.SmoothTurnSpeedModifier.Value);
                 else if (controls.TurnRight.Pressed())
-                    Rig.RotateOffset(180 * Time.deltaTime * Plugin.Config.SmoothTurnSpeedModifier.Value);
+                    Rig.AddRotation(180 * Time.deltaTime * Plugin.Config.SmoothTurnSpeedModifier.Value);
                 break;
             
             case Config.TurnProviderOption.Disabled:
@@ -114,7 +114,7 @@ public class VRPlayer : MonoBehaviour
     /// </summary>
     private void UpdateIK()
     {
-        if (player.data.dead || player.data.bed is not null)
+        if (player.data.dead || player.data.currentBed is not null)
             return;
         
         rigHandler.SetLeftHandPosition(Rig.LeftHand.position, Rig.LeftHand.rotation);
@@ -134,7 +134,7 @@ public class VRPlayer : MonoBehaviour
     private void PushPlayerToCamera()
     {
         // Don't force push the player when they're dead or eeping
-        if (player.data.dead || player.data.bed is not null)
+        if (player.data.dead || player.data.currentBed is not null)
             return;
 
         // Push player towards camera if it's too far away

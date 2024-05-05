@@ -1,3 +1,4 @@
+using CWVR.Input;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
 
@@ -32,15 +33,15 @@ public class XRRig : MonoBehaviour
     private Vector2 originOffset = Vector2.zero;
 
     public Vector3 DesiredCameraPosition =>
-        player.refs.cameraPos.TransformPoint((player.Ragdoll() || player.data.bed is not null) ? Vector3.zero : new Vector3(0, 0.1f, -0.1f));
-
-
+        player.refs.cameraPos.TransformPoint(player.Ragdoll() || player.data.currentBed is not null ? Vector3.zero : new Vector3(0, 0.1f, -0.1f));
+    
     private void Awake()
     {
         Camera = VRSession.Instance.MainCamera;
+        
+        // Set up camera hierarchy
         transform.SetParent(Camera.transform.parent, false);
         transform.localScale = Vector3.one * WORLD_SCALE;
-
         Camera.transform.SetParent(transform, false);
 
         // Hello player
@@ -52,7 +53,7 @@ public class XRRig : MonoBehaviour
         cameraTracker.deviceType = TrackedPoseDriver.DeviceType.GenericXRDevice;
         cameraTracker.poseSource = TrackedPoseDriver.TrackedPose.Center;
         cameraTracker.trackingType = TrackedPoseDriver.TrackingType.RotationAndPosition;
-
+        
         // Create controllers
         LeftController = new GameObject("Left VR Controller").transform;
         RightController = new GameObject("Right VR Controller").transform;
@@ -101,6 +102,8 @@ public class XRRig : MonoBehaviour
             heightOffset = off;
         else
             heightOffset = -cameraTracker.GetPoseData().position.y;
+        
+        Logger. LogDebug($"Changed height offset to {heightOffset}");
     }
 
     private void Update()
@@ -129,7 +132,7 @@ public class XRRig : MonoBehaviour
         
         transform.position = DesiredCameraPosition;
 
-        if (player.Ragdoll() || player.data.dead || player.data.bed is not null) {
+        if (player.Ragdoll() || player.data.dead || player.data.currentBed is not null) {
             transform.position += (transform.position - Camera.transform.position) * WORLD_SCALE;
             rotationOffset = 0;
         }
@@ -141,7 +144,8 @@ public class XRRig : MonoBehaviour
         }
         
         // FUCK IT, WE ROLL!
-        if ((player.Ragdoll() || player.HangingUpsideDown() || player.data.bed is not null) && !Plugin.Config.DisableRagdollCamera.Value)
+        if ((player.Ragdoll() || player.HangingUpsideDown() || player.data.currentBed is not null) &&
+            !Plugin.Config.DisableRagdollCamera.Value)
         {
             var rotation = player.refs.ragdoll.GetBodypart(BodypartType.Head).rig.transform.rotation;
 
@@ -204,7 +208,7 @@ public class XRRig : MonoBehaviour
         originOffset += movement;
     }
 
-    public void RotateOffset(float rotation)
+    public void AddRotation(float rotation)
     {
         rotationOffset = (rotationOffset + rotation) % 360;
     }

@@ -4,6 +4,7 @@ using CWVR.Player;
 using CWVR.UI;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 namespace CWVR;
@@ -35,6 +36,7 @@ internal static class UniversalEntrypoint
         {
             // Create settings menu
             Object.FindObjectOfType<MainMenuSettingsPage>(true).gameObject.AddComponent<UI.Settings.SettingsMenu>();
+            return;
         }
         
         __instance.StartCoroutine(Start());

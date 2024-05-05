@@ -45,6 +45,9 @@ public class Config(ConfigFile file)
     public ConfigEntry<bool> FirstTimeLaunch { get; } = file.Bind("Internal", "FirstTimeLaunch", true,
         "Keeps track if the game was launched in VR before. For internal use only.");
 
+    public ConfigEntry<string> OpenXRRuntimeFile { get; } = file.Bind("Internal", "OpenXRRuntimeFile", "",
+        "Overrides the OpenXR plugin to use a specific json file. For internal use only.");
+    
     public enum TurnProviderOption
     {
         Snap,

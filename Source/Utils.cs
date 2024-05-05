@@ -1,3 +1,5 @@
+using System.IO;
+using System.Runtime.Serialization.Json;
 using System.Security.Cryptography;
 using System.Text;
 using CWVR.Player;
@@ -77,14 +79,13 @@ internal static class Utils
     }
 }
 
-internal class LerpFloat(float value = 0)
+internal static class JSON
 {
-    public float Value { get; private set; } = value;
-    public float Target { get; set; } = value;
-    public float Factor { get; set; } = 0.1f;
-    
-    public void Update()
+    public static T Deserialize<T>(string json)
     {
-        Value = Mathf.Lerp(Value, Target, Factor);
+        using var mem = new MemoryStream(Encoding.UTF8.GetBytes(json));
+        var serializer = new DataContractJsonSerializer(typeof(T));
+
+        return (T)serializer.ReadObject(mem);
     }
 }

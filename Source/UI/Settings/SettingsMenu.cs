@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using BepInEx.Configuration;
 using CWVR.Assets;
 using CWVR.Patches;
@@ -19,6 +20,8 @@ public class SettingsMenu : MonoBehaviour
 
     private bool isInitializing;
     private bool isDirty;
+
+    private TMP_Dropdown runtimesDropdown;
     
     private void Awake()
     {
@@ -63,17 +66,51 @@ public class SettingsMenu : MonoBehaviour
         }
 
         var uiList = new List<GameObject>();
-        
+
+        // Prepare prefabs
+        var enumPrefab = AssetManager.Load<GameObject>("EnumSettingCell");
+        var sliderPrefab = AssetManager.Load<GameObject>("SliderSettingCell");
+        var boolPrefab = AssetManager.Load<GameObject>("BooleanSettingCell");
+
+        // Add OpenXR Runtime setting
+        var runtimes = OpenXR.DetectOpenXRRuntimes(out _);
+
+        if (runtimes != null)
+        {
+            var enumUI = Instantiate(enumPrefab, container);
+            var text = enumUI.GetComponentInChildren<TextMeshProUGUI>();
+            var entry = enumUI.GetComponentInChildren<ConfigEntry>();
+            runtimesDropdown = enumUI.GetComponentInChildren<TMP_Dropdown>();
+
+            text.text = "OpenXR Runtime";
+            entry.m_Category = "Internal";
+            entry.m_Name = "OpenXRRuntimeFile";
+
+            var selectedIndex = 0;
+
+            if (!string.IsNullOrEmpty(Plugin.Config.OpenXRRuntimeFile.Value))
+                for (var i = 0; i < runtimes.Count; i++)
+                    if (runtimes.ElementAt(i).Value == Plugin.Config.OpenXRRuntimeFile.Value)
+                    {
+                        selectedIndex = i + 1;
+                        break;
+                    }
+
+            runtimesDropdown.AddOptions(["System Default", .. runtimes.Keys]);
+            runtimesDropdown.value = selectedIndex;
+
+            uiList.Add(enumUI);
+        }
+
+        // Add settings derived from Config.cs
         foreach (var (category, settings) in categories)
         {
-            foreach (var setting in settings)
+            foreach (var (key, config) in settings)
             {
-                var name = setting.Key.Key;
-                var config = setting.Value;
+                var name = key.Key;
 
                 if (config.SettingType.IsEnum)
                 {
-                    var enumPrefab = AssetManager.Load<GameObject>("EnumSettingCell");
                     var enumUI = Instantiate(enumPrefab, container);
                     var text = enumUI.GetComponentInChildren<TextMeshProUGUI>();
                     var dropdown = enumUI.GetComponentInChildren<TMP_Dropdown>();
@@ -84,7 +121,7 @@ public class SettingsMenu : MonoBehaviour
                     entry.m_Name = name;
 
                     var names = Enum.GetNames(config.SettingType);
-                    var idx = Array.FindIndex(names, (name) => name == config.BoxedValue.ToString());
+                    var idx = Array.FindIndex(names, name => name == config.BoxedValue.ToString());
 
                     dropdown.ClearOptions();
                     dropdown.AddOptions([.. names]);
@@ -95,7 +132,6 @@ public class SettingsMenu : MonoBehaviour
                 else if (config.SettingType == typeof(float) &&
                          config.Description.AcceptableValues is AcceptableValueRange<float> floatValues)
                 {
-                    var sliderPrefab = AssetManager.Load<GameObject>("SliderSettingCell");
                     var sliderUI = Instantiate(sliderPrefab, container);
                     var text = sliderUI.GetComponentInChildren<TextMeshProUGUI>();
                     var slider = sliderUI.GetComponentInChildren<Slider>();
@@ -117,7 +153,6 @@ public class SettingsMenu : MonoBehaviour
                 else if (config.SettingType == typeof(int) &&
                          config.Description.AcceptableValues is AcceptableValueRange<int> intValues)
                 {
-                    var sliderPrefab = AssetManager.Load<GameObject>("SliderSettingCell");
                     var sliderUI = Instantiate(sliderPrefab, container);
                     var text = sliderUI.GetComponentInChildren<TextMeshProUGUI>();
                     var slider = sliderUI.GetComponentInChildren<Slider>();
@@ -138,7 +173,6 @@ public class SettingsMenu : MonoBehaviour
                 }
                 else if (config.SettingType == typeof(bool))
                 {
-                    var boolPrefab = AssetManager.Load<GameObject>("BooleanSettingCell");
                     var boolUI = Instantiate(boolPrefab, container);
                     var text = boolUI.GetComponentInChildren<TextMeshProUGUI>();
                     var dropdown = boolUI.GetComponentInChildren<TMP_Dropdown>();
@@ -173,11 +207,40 @@ public class SettingsMenu : MonoBehaviour
             Destroy(obj);
     }
 
+    private void SetOpenXRRuntime(int index)
+    {
+        if (!runtimesDropdown)
+            return;
+        
+        if (index == 0)
+        {
+            Plugin.Config.OpenXRRuntimeFile.Value = "";
+            return;
+        }
+
+        var name = runtimesDropdown.options[index].text;
+        var runtimes = OpenXR.DetectOpenXRRuntimes(out _);
+        
+        if (!runtimes.TryGetValue(name, out var runtimeFile))
+        {
+            Modal.ShowError("Error", "Failed to update OpenXR Runtime");
+            return;
+        }
+
+        Plugin.Config.OpenXRRuntimeFile.Value = runtimeFile;
+    }
+    
     internal void UpdateValue(string category, string name, object value)
     {
         // Ignore updates when populating initial values
         if (isInitializing)
             return;
+
+        if (category == "Internal" && name == "OpenXRRuntimeFile")
+        {
+            SetOpenXRRuntime((int)value);
+            return;
+        }
 
         var entry = Plugin.Config.File[category, name];
         if (entry is null)

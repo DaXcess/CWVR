@@ -32,7 +32,7 @@ public class NetworkPlayer : MonoBehaviour
 
     private void UpdateIK()
     {
-        if (player.data.dead || player.data.bed is not null)
+        if (player.data.dead || player.data.currentBed is not null)
             return;
         
         rigHandler.SetLeftHandPosition(leftHandWorldPos, Quaternion.Euler(leftHandRot));

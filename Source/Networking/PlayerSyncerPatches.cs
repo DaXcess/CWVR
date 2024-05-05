@@ -29,7 +29,7 @@ internal static class PlayerSyncerPatches
         if (!stream.IsWriting)
             return;
 
-        if (__instance.player.data.dead || __instance.player.data.bed is not null)
+        if (__instance.player.data.dead || __instance.player.data.currentBed is not null)
             return;
         
         // Reverse the camera rotation to playerLookValues for syncing to the network
