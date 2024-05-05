@@ -39,33 +39,5 @@ internal static class BodypartPatches
         __instance.rig.transform.rotation = __instance.animationTarget.transform.rotation;
 
         return false;
-        // torque = 200f;
     }
-    
-    // TODO: Experimental
-    // [HarmonyPatch(typeof(PlayerRagdoll), nameof(PlayerRagdoll.FollowAnim))]
-    // [HarmonyPrefix]
-    // private static bool FollowAnim(PlayerRagdoll __instance)
-    // {
-    //     var hip = __instance.bodypartDict[BodypartType.Hip];
-    //     if (!hip.animationTarget)
-    //         return false;
-    //
-    //     foreach (var bodypart in __instance.bodypartList)
-    //     {
-    //         bodypart.FollowAnimJointDrive();
-    //         bodypart.FollowAnimJointVel(hip.transform, hip.animationTarget.transform, __instance.force, __instance.addOpposingForce);
-    //         
-    //         if (bodypart.bodypartType is BodypartType.Hand_L or BodypartType.Hand_R)
-    //         {
-    //             bodypart.rig.MoveRotation(bodypart.animationTarget.transform.rotation);
-    //         }
-    //         else
-    //         {
-    //             bodypart.FollowAnimJointAngularVel(hip.transform, hip.animationTarget.transform, __instance.torque);
-    //         }
-    //     }
-    //     
-    //     return false;
-    // }
 }

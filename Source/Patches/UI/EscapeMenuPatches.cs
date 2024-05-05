@@ -1,7 +1,5 @@
-using System.Collections;
 using CWVR.Player;
 using HarmonyLib;
-using UnityEngine;
 
 namespace CWVR.Patches.UI;
 
@@ -29,6 +27,16 @@ internal static class EscapeMenuPatches
     }
 
     /// <summary>
+    /// Detect when the pause menu was closed via the RESUME button
+    /// </summary>
+    [HarmonyPatch(typeof(EscapeMenuMainPage), nameof(EscapeMenuMainPage.OnResumeButtonClicked))]
+    [HarmonyPostfix]
+    private static void OnClosePauseMenu()
+    {
+        VRSession.Instance.HUD.PauseMenu.OnClose();
+    }
+
+    /// <summary>
     /// Make sure that the settings page is also rendered on top and interactable
     /// </summary>
     [HarmonyPatch(typeof(SettingsCell), nameof(SettingsCell.Setup))]
@@ -38,6 +46,16 @@ internal static class EscapeMenuPatches
         if (VRSession.Instance is null)
             return;
 
+        __instance.gameObject.SetLayerRecursive(6);
+    }
+
+    /// <summary>
+    /// Make sure the player list is interactable in VR
+    /// </summary>
+    [HarmonyPatch(typeof(EscapePlayerCellUI), nameof(EscapePlayerCellUI.Setup))]
+    [HarmonyPostfix]
+    private static void OnSetupPlayerSlider(EscapePlayerCellUI __instance)
+    {
         __instance.gameObject.SetLayerRecursive(6);
     }
 }

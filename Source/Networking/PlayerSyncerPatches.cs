@@ -4,7 +4,6 @@ using CWVR.Patches;
 using CWVR.Player;
 using HarmonyLib;
 using Photon.Pun;
-using Unity.Mathematics;
 using UnityEngine;
 using Zorro.Core.Serizalization;
 using static HarmonyLib.AccessTools;
@@ -30,12 +29,15 @@ internal static class PlayerSyncerPatches
         if (!stream.IsWriting)
             return;
 
+        if (__instance.player.data.dead || __instance.player.data.currentBed is not null)
+            return;
+        
         // Reverse the camera rotation to playerLookValues for syncing to the network
         // ChatGPT did this (and it works, surprisingly), cuz I ain't a mathematician
         var forward = VRSession.Instance.MainCamera.transform.forward;
         var yaw = Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
         var pitch = Mathf.Asin(forward.y) * Mathf.Rad2Deg;
-
+        
         __instance.player.data.playerLookValues = new Vector2(yaw, pitch);
     }
 
@@ -138,7 +140,5 @@ internal static class UniversalPlayerSyncerPatches
             player = VRSession.Instance.NetworkManager.RegisterVRPlayer(syncer.player);
         
         player.DeserializeRig(deserializer);
-
-        Logger.LogDebug((deserializer.position, deserializer.buffer.Length));
     }
 }

@@ -19,21 +19,12 @@ internal static class BedPatches
     }
     
     /// <summary>
-    /// Allow the use of VR controllers to leave the bed
+    /// Reset height when leaving the bed
     /// </summary>
-    [HarmonyPatch(typeof(Bed), nameof(Bed.Update))]
+    [HarmonyPatch(typeof(Bed), nameof(Bed.LeaveBed))]
     [HarmonyPostfix]
-    private static void OnUpdate(Bed __instance)
+    private static void OnLeaveBed()
     {
-        if (__instance.playerInBed is null || global::Player.localPlayer != __instance.playerInBed)
-            return;
-
-        var controls = VRSession.Instance.Controls;
-        if (controls.Jump.PressedDown() || controls.Interact.PressedDown() || controls.Menu.PressedDown() ||
-            controls.Sprint.PressedDown())
-        {
-            __instance.LeaveBed();
-            VRSession.Instance.LocalPlayer.Rig.ResetHeight();
-        }
+        VRSession.Instance.LocalPlayer.Rig.ResetHeight();
     }
 }

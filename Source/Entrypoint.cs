@@ -4,6 +4,8 @@ using CWVR.Player;
 using CWVR.UI;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 
 namespace CWVR;
 
@@ -31,7 +33,11 @@ internal static class UniversalEntrypoint
     private static void OnGameEntered(GameAPI __instance)
     {
         if (__instance.name == "MainMenuGame")
+        {
+            // Create settings menu
+            Object.FindObjectOfType<MainMenuSettingsPage>(true).gameObject.AddComponent<UI.Settings.SettingsMenu>();
             return;
+        }
         
         __instance.StartCoroutine(Start());
     }
@@ -40,6 +46,9 @@ internal static class UniversalEntrypoint
     {
         yield return new WaitUntil(() => global::Player.localPlayer is not null);
 
+        if (SceneManager.GetActiveScene().name == "MainMenuGame")
+            yield break;
+        
         // Setup session manager
         new GameObject("CWVR Session Manager").AddComponent<VRSession>();
     }

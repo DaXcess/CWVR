@@ -8,6 +8,8 @@ using BepInEx;
 using CWVR.Assets;
 using CWVR.Patches;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR;
@@ -21,7 +23,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PLUGIN_GUID = "io.daxcess.cwvr";
     private const string PLUGIN_NAME = "CWVR";
-    private const string PLUGIN_VERSION = "0.0.1";
+    private const string PLUGIN_VERSION = "1.0.0";
     
     private const string BANNER = "                             ,--.,--.                         \n ,-----.,--.   ,--.         /  //  /     ,--.   ,--.,------.  \n'  .--./|  |   |  |        /  //  /       \\  `.'  / |  .--. ' \n|  |    |  |.'.|  |       /  //  /         \\     /  |  '--'.' \n'  '--'\\|   ,'.   |      /  //  /           \\   /   |  |\\  \\  \n `-----''--'   '--'     /  //  /             `-'    `--' '--' \n                       `--'`--'                               \n\n             ___________________________ \n            < Another VR mod by DaXcess >\n             --------------------------- \n                    \\   ^__^\n                     \\  (oo)\\_______\n                        (__)\\       )\\/\\\n                            ||----w |\n                            ||     ||\n";
 
@@ -53,11 +55,16 @@ public class Plugin : BaseUnityPlugin
         if (!AssetManager.LoadAssets())
         {
             Logger.LogError("Disabling mod because assets could not be loaded!");
-            // return;
+            return;
         }
 
         HarmonyPatcher.PatchUniversal();
         Logger.LogInfo("Inserted Universal patches using Harmony");
+
+        SceneManager.sceneLoaded += (scene, mode) =>
+        {
+            Logger.LogDebug($"Loaded scene: {scene.name}");
+        };
 
         if (disableVr || !InitializeVR())
             return;
@@ -108,15 +115,18 @@ public class Plugin : BaseUnityPlugin
     private bool InitializeVR()
     {
         Logger.LogInfo("Loading VR...");
-        
+
         SetupRuntimeAssets(out var mustRestart);
         if (mustRestart)
         {
             Logger.LogError("You must restart the game to allow VR to function properly");
             Flags |= Flags.RestartRequired;
-            
+
             return false;
         }
+        
+        if (!string.IsNullOrEmpty(Config.OpenXRRuntimeFile.Value))
+            Environment.SetEnvironmentVariable("XR_RUNTIME_JSON", Config.OpenXRRuntimeFile.Value);
 
         EnableControllerProfiles();
         InitializeXRRuntime();
@@ -124,12 +134,55 @@ public class Plugin : BaseUnityPlugin
         if (!StartDisplay())
         {
             Logger.LogError("Failed to start in VR Mode! Only Non-VR features are available!");
+
+            if (OpenXR.GetDiagnosticReport(out var report))
+            {
+                Logger.LogWarning($"Runtime Name:    {report.RuntimeName}");
+                Logger.LogWarning($"Runtime Version: {report.RuntimeVersion}");
+                Logger.LogWarning($"Last Error:      {report.Error}");
+                Logger.LogWarning("");
+
+                switch (report.Error)
+                {
+                    case "XR_ERROR_RUNTIME_UNAVAILABLE":
+                        Logger.LogWarning(
+                            "It appears that no OpenXR runtime is currently active. Please go to the dedicated application for your VR headset and make sure that it is running, and set as default OpenXR runtime.");
+                        break;
+
+                    case "XR_ERROR_FORM_FACTOR_UNAVAILABLE":
+                        Logger.LogWarning(
+                            "This generally means that your headset is not connected, or that your headset is connected to a different runtime. Please make sure your headset is active and connected, and that you are using the correct OpenXR runtime.");
+                        break;
+
+                    default:
+                        Logger.LogWarning("Unknown reason for OpenXR failure!");
+                        Logger.LogWarning($"\n{OpenXR.GenerateTextReport()}");
+                        break;
+                }
+            }
+            else Logger.LogError("Failed to generate OpenXR diagnostics report!");
+
+            var runtimes = OpenXR.DetectOpenXRRuntimes(out var defaultRuntime);
+            if (runtimes == null) return false;
+
+            Logger.LogWarning("List of registered OpenXR runtimes on this device:");
+            Logger.LogWarning(defaultRuntime != null ? $">>> {defaultRuntime}" : "No default runtime detected!");
+
+            foreach (var rt in runtimes.Keys.Where(rt => rt != defaultRuntime))
+                Logger.LogWarning($"    {rt}");
+
             return false;
         }
-        
+
+        if (OpenXR.GetRuntimeName(out var name) &&
+            OpenXR.GetRuntimeVersion(out var major, out var minor, out var patch))
+            Logger.LogInfo($"OpenXR Runtime being used: {name} ({major}.{minor}.{patch})");
+        else
+            Logger.LogWarning("Could not get OpenXR Runtime info?");
+
         HarmonyPatcher.PatchVR();
         Logger.LogInfo("Inserted VR patches using Harmony");
-        
+
         return true;
     }
 

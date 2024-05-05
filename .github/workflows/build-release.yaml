@@ -1,10 +1,10 @@
-name: Build Debug
+name: Build Release
 
 on:
   push:
-    branches: ["dev"]
+    branches: ["main"]
   pull_request:
-    branches: ["dev"]
+    branches: ["main"]
 
 jobs:
   build:
@@ -27,13 +27,19 @@ jobs:
         run: |
           # Extract package version from project
           echo "version=$(grep -oP '<Version>\K[^<]+' CWVR.csproj)" >> "$GITHUB_OUTPUT"
-          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Restore NuGet packages
         run: dotnet restore
 
+      - name: Build NuGet package
+        run: dotnet pack -p:Version='${{ steps.vars.outputs.version }}' -c Release
+        
+      - name: Upload NuGet package
+        if: github.event_name == 'push'
+        run: dotnet nuget push bin/Release/*.nupkg --api-key ${{ secrets.NUGET_TOKEN }} --source https://nuget.daxcess.io/v3/index.json
+
       - name: Build CWVR
-        run: dotnet build
+        run: dotnet build -c Release
 
       - name: Configure GPG Key
         run: |
@@ -47,8 +53,8 @@ jobs:
           mkdir package
           git --work-tree=./package checkout origin/thunderstore ./
 
-          # Copy and sign debug binary
-          cp bin/Debug/netstandard2.1/CWVR.dll ./package/BepInEx/plugins/CWVR/
+          # Copy and sign release binary
+          cp bin/Release/netstandard2.1/CWVR.dll ./package/BepInEx/plugins/CWVR/
           gpg --output ./package/BepInEx/plugins/CWVR/CWVR.dll.sig --detach-sig ./package/BepInEx/plugins/CWVR/CWVR.dll
 
           # Copy docs and license
@@ -64,5 +70,5 @@ jobs:
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: CWVR-${{ steps.vars.outputs.version }}-dev-${{ steps.vars.outputs.sha_short }}
+          name: CWVR-${{ steps.vars.outputs.version }}
           path: ./package

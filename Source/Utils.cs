@@ -1,4 +1,8 @@
+using System.IO;
+using System.Runtime.Serialization.Json;
 using System.Security.Cryptography;
+using System.Text;
+using CWVR.Player;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
 
@@ -32,16 +36,56 @@ internal static class Utils
                 child.gameObject.SetLayerRecursive(layer);
         }
     }
+
+    public static string PascalToLongString(string text)
+    {
+        var builder = new StringBuilder(text[0].ToString());
+        if (builder.Length <= 0) return builder.ToString();
+
+        for (var index = 1; index < text.Length; index++)
+        {
+            var prevChar = text[index - 1];
+            var nextChar = index + 1 < text.Length ? text[index + 1] : '\0';
+
+            var isNextLower = char.IsLower(nextChar);
+            var isNextUpper = char.IsUpper(nextChar);
+            var isPresentUpper = char.IsUpper(text[index]);
+            var isPrevLower = char.IsLower(prevChar);
+            var isPrevUpper = char.IsUpper(prevChar);
+
+            if (!string.IsNullOrWhiteSpace(prevChar.ToString()) &&
+                ((isPrevUpper && isPresentUpper && isNextLower) ||
+                 (isPrevLower && isPresentUpper && isNextLower) ||
+                 (isPrevLower && isPresentUpper && isNextUpper)))
+            {
+                builder.Append(' ');
+                builder.Append(text[index]);
+            }
+            else
+            {
+                builder.Append(text[index]);
+            }
+        }
+
+        return builder.ToString();
+    }
+
+    public static bool InVR(this global::Player player)
+    {
+        if (player.IsLocal)
+            return VRSession.InVR;
+
+        return VRSession.Instance && VRSession.Instance.NetworkManager.InVR(player);
+    }
 }
 
-internal class LerpFloat(float value = 0)
+internal static class JSON
 {
-    public float Value { get; private set; } = value;
-    public float Target { get; set; } = value;
-    public float Factor { get; set; } = 0.1f;
-    
-    public void Update()
+    public static T Deserialize<T>(string json)
     {
-        Value = Mathf.Lerp(Value, Target, Factor);
+        using var mem = new MemoryStream(Encoding.UTF8.GetBytes(json));
+        var serializer = new DataContractJsonSerializer(typeof(T));
+
+        return (T)serializer.ReadObject(mem);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using CWVR.Assets;
 using CWVR.Player;
+using Microsoft.MixedReality.Toolkit.Experimental.UI;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR;
@@ -16,6 +17,8 @@ public class PauseMenu : MonoBehaviour
 
     private XRInteractorLineVisual leftHandVisual;
     private XRInteractorLineVisual rightHandVisual;
+
+    private NonNativeKeyboard keyboard;
     
     private void Awake()
     {
@@ -24,6 +27,8 @@ public class PauseMenu : MonoBehaviour
         canvas.renderMode = RenderMode.WorldSpace;
         canvas.transform.localScale = Vector3.one * 0.0025f;
         canvas.gameObject.SetLayerRecursive(6);
+
+        canvas.GetComponent<RectTransform>().sizeDelta = new Vector2(1920, 1080);
 
         var bgFront = canvas.transform.Find("Background (1)");
         bgFront.localScale = Vector3.one * 10;
@@ -57,6 +62,15 @@ public class PauseMenu : MonoBehaviour
 
         gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
 
+        keyboard = Instantiate(AssetManager.Keyboard, GameAPI.instance.transform).GetComponent<NonNativeKeyboard>();
+        keyboard.SubmitOnEnter = true;
+        keyboard.gameObject.SetLayerRecursive(6);
+        keyboard.transform.localScale = Vector3.one * 0.004f;
+        keyboard.GetComponent<Canvas>().sortingOrder = 1;
+        
+        var autoKeyboard = gameObject.AddComponent<AutoKeyboard>();
+        autoKeyboard.keyboard = keyboard;
+
         (leftHandInteractor, leftHandVisual) = CreateInteractorController(XRNode.LeftHand);
         (rightHandInteractor, rightHandVisual) = CreateInteractorController(XRNode.RightHand);
     }
@@ -70,6 +84,9 @@ public class PauseMenu : MonoBehaviour
         rightHandVisual.enabled = true;
         
         ResetPosition();
+        
+        keyboard.transform.position = transform.position + Vector3.up * -2.3f + transform.forward * -0.4f;
+        keyboard.transform.rotation = transform.rotation * Quaternion.Euler(20, 0, 0);
     }
 
     public void OnClose()
@@ -79,6 +96,8 @@ public class PauseMenu : MonoBehaviour
         
         rightHandInteractor.enabled = false;
         rightHandVisual.enabled = false;
+        
+        keyboard.Close();
     }
 
     private void ResetPosition()
@@ -127,7 +146,7 @@ public class PauseMenu : MonoBehaviour
         };
         visual.enabled = true;
 
-        renderer.material = AssetManager.whiteMat;
+        renderer.material = AssetManager.WhiteMat;
         controller.controllerNode = node;
         
         go.SetLayerRecursive(6);

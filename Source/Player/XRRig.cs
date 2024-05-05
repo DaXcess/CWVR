@@ -1,3 +1,4 @@
+using CWVR.Input;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
 
@@ -6,6 +7,8 @@ namespace CWVR.Player;
 public class XRRig : MonoBehaviour
 {
     private const float WORLD_SCALE = 1.25f;
+
+    private readonly Collider[] cameraClipCollider = new Collider[1];
 
     public Camera Camera { get; private set; }
 
@@ -23,31 +26,34 @@ public class XRRig : MonoBehaviour
     private TrackedPoseDriver rightHandTracker;
 
     private global::Player player;
+    private Spectate spectate;
     private float heightOffset;
     private float rotationOffset;
 
+    private Vector2 originOffset = Vector2.zero;
+
     public Vector3 DesiredCameraPosition =>
-        player.refs.cameraPos.TransformPoint((player.Ragdoll() || player.data.bed is not null) ? Vector3.zero : new Vector3(0, 0.1f, -0.1f));
-
-    public Vector2 OriginOffset { get; private set; } = Vector2.zero;
-
+        player.refs.cameraPos.TransformPoint(player.Ragdoll() || player.data.currentBed is not null ? Vector3.zero : new Vector3(0, 0.1f, -0.1f));
+    
     private void Awake()
     {
         Camera = VRSession.Instance.MainCamera;
+        
+        // Set up camera hierarchy
         transform.SetParent(Camera.transform.parent, false);
         transform.localScale = Vector3.one * WORLD_SCALE;
-
         Camera.transform.SetParent(transform, false);
 
         // Hello player
         player = global::Player.localPlayer;
-
+        spectate = Camera.GetComponent<Spectate>();
+        
         // Create HMD tracker
         cameraTracker = Camera.gameObject.AddComponent<TrackedPoseDriver>();
         cameraTracker.deviceType = TrackedPoseDriver.DeviceType.GenericXRDevice;
         cameraTracker.poseSource = TrackedPoseDriver.TrackedPose.Center;
         cameraTracker.trackingType = TrackedPoseDriver.TrackingType.RotationAndPosition;
-
+        
         // Create controllers
         LeftController = new GameObject("Left VR Controller").transform;
         RightController = new GameObject("Right VR Controller").transform;
@@ -96,25 +102,50 @@ public class XRRig : MonoBehaviour
             heightOffset = off;
         else
             heightOffset = -cameraTracker.GetPoseData().position.y;
+        
+        Logger. LogDebug($"Changed height offset to {heightOffset}");
+    }
+
+    private void Update()
+    {
+        // Prevent clipping the camera through walls etc
+        if (Physics.OverlapBoxNonAlloc(Camera.transform.position, Vector3.one * 0.1f, cameraClipCollider,
+                Quaternion.identity, HelperFunctions.GetMask(HelperFunctions.LayerType.TerrainProp)) > 0)
+        {
+            originOffset = -Camera.transform.localPosition.XZ();
+        }
+
+        // Detect reset height
+        if (VRSession.Instance.Controls.ResetHeight.PressedDown())
+        {
+            ResetHeight();
+        }
     }
 
     private void LateUpdate()
     {
+        if (Spectate.spectating)
+        {
+            DoSpectate();
+            return;
+        }
+        
         transform.position = DesiredCameraPosition;
 
-        if (player.Ragdoll() || player.data.dead || player.data.bed is not null) {
+        if (player.Ragdoll() || player.data.dead || player.data.currentBed is not null) {
             transform.position += (transform.position - Camera.transform.position) * WORLD_SCALE;
             rotationOffset = 0;
         }
         else
         {
-            transform.position += new Vector3(OriginOffset.x, 0, OriginOffset.y);
+            transform.position += new Vector3(originOffset.x, 0, originOffset.y);
             transform.position += GamefeelHandler.instance.GetPositionOffsets() +
                                   new Vector3(0, heightOffset, 0) * WORLD_SCALE;
         }
         
         // FUCK IT, WE ROLL!
-        if ((player.Ragdoll() || player.HangingUpsideDown() || player.data.bed is not null) && !Plugin.Config.DisableRagdollCamera.Value)
+        if ((player.Ragdoll() || player.HangingUpsideDown() || player.data.currentBed is not null) &&
+            !Plugin.Config.DisableRagdollCamera.Value)
         {
             var rotation = player.refs.ragdoll.GetBodypart(BodypartType.Head).rig.transform.rotation;
 
@@ -129,12 +160,55 @@ public class XRRig : MonoBehaviour
             transform.localEulerAngles = new Vector3(0, rotationOffset, 0);
     }
 
-    public void MoveOriginOffset(Vector2 movement)
+    private void DoSpectate()
     {
-        OriginOffset += movement;
+        if (global::Player.observedPlayer == null)
+            return;
+
+        var controls = VRSession.Instance.Controls;
+
+        transform.rotation = Quaternion.LookRotation(spectate.lookDirection);
+        transform.position = global::Player.observedPlayer.TransformCenter() + Vector3.up * 0.75f +
+                             new Vector3(originOffset.x, 0, originOffset.y);
+
+        var vector = transform.position + transform.forward * -3f;
+        var hit = HelperFunctions.LineCheck(transform.position, vector, HelperFunctions.LayerType.TerrainProp);
+
+        if (hit.transform)
+            transform.position += -transform.forward * (hit.distance - 0.2f);
+        else
+            transform.position = vector + transform.forward * 0.2f;
+
+        var pivot = controls.Pivot.GetValue() * 3;
+
+        // Move origin back to "center" while camera is being pivotted
+        if (pivot.x > 0 || pivot.y > 0)
+        {
+            var desiredPosition = -Camera.transform.localPosition.XZ();
+
+            originOffset = Vector2.Lerp(originOffset, desiredPosition, 0.1f);
+        }
+
+        spectate.look.x += pivot.x;
+        spectate.look.y += pivot.y;
+        spectate.look.y = Mathf.Clamp(spectate.look.y, -80f, 80f);
+        spectate.lookDirection = HelperFunctions.LookToDirection(spectate.look, Vector3.forward);
+
+        transform.eulerAngles = new Vector3(0, rotationOffset, 0);
+
+        if (controls.SpectateNext.PressedDown())
+            global::Player.observedPlayer = PlayerHandler.instance.GetNextPlayerAlive(global::Player.observedPlayer, 1);
+        else if (controls.SpectatePrevious.PressedDown())
+            global::Player.observedPlayer =
+                PlayerHandler.instance.GetNextPlayerAlive(global::Player.observedPlayer, -1);
     }
 
-    public void RotateOffset(float rotation)
+    public void MoveOriginOffset(Vector2 movement)
+    {
+        originOffset += movement;
+    }
+
+    public void AddRotation(float rotation)
     {
         rotationOffset = (rotationOffset + rotation) % 360;
     }

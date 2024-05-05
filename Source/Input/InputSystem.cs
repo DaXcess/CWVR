@@ -49,8 +49,7 @@ public class InputSystem : MonoBehaviour
         controls.Do(ctrl => ctrl.Update());
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public InputDevice GetController(XRController controller)
+    private InputDevice GetController(XRController controller)
     {
         return controller switch
         {
