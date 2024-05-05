@@ -51,3 +51,6 @@ You can change the mod configuration from within the game itself. Just launch th
 
 > _You can change the settings mid-game, you do not have to restart or rejoin._
 
+# Controls
+
+At the moment, CW // VR only supports Oculus styled controller layouts (ABXY-based). For more detailed controls, check out the controls [wiki page](https://thunderstore.io/c/content-warning/p/DaXcess/CWVR/wiki) on Thunderstore. 
