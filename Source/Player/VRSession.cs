@@ -53,7 +53,19 @@ public class VRSession : MonoBehaviour
         HUD = gameObject.AddComponent<HUD>();        
         
         // Add VR settings to pause menu
-        FindObjectOfType<EscapeMenuSettingsPage>(true).gameObject.AddComponent<UI.Settings.SettingsMenu>();
+        var settingsObj = FindObjectOfType<EscapeMenuSettingsPage>(true).gameObject;
+        var settingsMenu = settingsObj.AddComponent<UI.Settings.SettingsMenu>();
+        var remapHandler = settingsObj.AddComponent<RemapHandler>();
+
+        settingsMenu.remapHandler = remapHandler;
+        
+        // Load controller bindings
+        if (Plugin.Config.EnableCustomControls.Value)
+            ControlScheme.LoadSchema(Plugin.Config.CustomControls.Value);
+        else
+            ControlScheme.LoadProfile(InputSystem.DetectControllerProfile());
+        
+        Controls.ReloadBindings();
     }
 
     private void OnDestroy()

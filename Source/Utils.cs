@@ -1,10 +1,13 @@
+using System;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Security.Cryptography;
 using System.Text;
+using CWVR.Input;
 using CWVR.Player;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
+using UnityEngine.XR;
 
 namespace CWVR;
 
@@ -76,6 +79,16 @@ internal static class Utils
             return VRSession.InVR;
 
         return VRSession.Instance && VRSession.Instance.NetworkManager.InVR(player);
+    }
+    
+    public static InputDevice GetDevice(this InputSystem.XRController controller)
+    {
+        return controller switch
+        {
+            InputSystem.XRController.Left => InputDevices.GetDeviceAtXRNode(XRNode.LeftHand),
+            InputSystem.XRController.Right => InputDevices.GetDeviceAtXRNode(XRNode.RightHand),
+            _ => throw new ArgumentOutOfRangeException(nameof(controller), controller, null)
+        };
     }
 }
 

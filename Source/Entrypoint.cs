@@ -1,4 +1,5 @@
 using System.Collections;
+using CWVR.Input;
 using CWVR.Patches;
 using CWVR.Player;
 using CWVR.UI;
@@ -35,10 +36,15 @@ internal static class UniversalEntrypoint
         if (__instance.name == "MainMenuGame")
         {
             // Create settings menu
-            Object.FindObjectOfType<MainMenuSettingsPage>(true).gameObject.AddComponent<UI.Settings.SettingsMenu>();
+            var settingsObj = Object.FindObjectOfType<MainMenuSettingsPage>(true).gameObject;
+            var remapHandler = settingsObj.AddComponent<RemapHandler>();
+            var settingsMenu = settingsObj.AddComponent<UI.Settings.SettingsMenu>();
+
+            settingsMenu.remapHandler = remapHandler;
+            
             return;
         }
-        
+
         __instance.StartCoroutine(Start());
     }
 

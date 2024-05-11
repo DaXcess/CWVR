@@ -4,7 +4,9 @@ using System.Globalization;
 using System.Linq;
 using BepInEx.Configuration;
 using CWVR.Assets;
+using CWVR.Input;
 using CWVR.Patches;
+using CWVR.Player;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
@@ -22,6 +24,8 @@ public class SettingsMenu : MonoBehaviour
     private bool isDirty;
 
     private TMP_Dropdown runtimesDropdown;
+
+    internal RemapHandler remapHandler;
     
     private void Awake()
     {
@@ -44,7 +48,7 @@ public class SettingsMenu : MonoBehaviour
 
     private GameObject[] objects = [];
 
-    internal void DisplaySettings(Transform container)
+    internal void DisplayVRSettings(Transform container)
     {
         isInitializing = true;
         
@@ -67,17 +71,12 @@ public class SettingsMenu : MonoBehaviour
 
         var uiList = new List<GameObject>();
 
-        // Prepare prefabs
-        var enumPrefab = AssetManager.Load<GameObject>("EnumSettingCell");
-        var sliderPrefab = AssetManager.Load<GameObject>("SliderSettingCell");
-        var boolPrefab = AssetManager.Load<GameObject>("BooleanSettingCell");
-
         // Add OpenXR Runtime setting
         var runtimes = OpenXR.DetectOpenXRRuntimes(out _);
 
         if (runtimes != null)
         {
-            var enumUI = Instantiate(enumPrefab, container);
+            var enumUI = Instantiate(AssetManager.EnumSettingCell, container);
             var text = enumUI.GetComponentInChildren<TextMeshProUGUI>();
             var entry = enumUI.GetComponentInChildren<ConfigEntry>();
             runtimesDropdown = enumUI.GetComponentInChildren<TMP_Dropdown>();
@@ -111,7 +110,7 @@ public class SettingsMenu : MonoBehaviour
 
                 if (config.SettingType.IsEnum)
                 {
-                    var enumUI = Instantiate(enumPrefab, container);
+                    var enumUI = Instantiate(AssetManager.EnumSettingCell, container);
                     var text = enumUI.GetComponentInChildren<TextMeshProUGUI>();
                     var dropdown = enumUI.GetComponentInChildren<TMP_Dropdown>();
                     var entry = enumUI.GetComponentInChildren<ConfigEntry>();
@@ -132,7 +131,7 @@ public class SettingsMenu : MonoBehaviour
                 else if (config.SettingType == typeof(float) &&
                          config.Description.AcceptableValues is AcceptableValueRange<float> floatValues)
                 {
-                    var sliderUI = Instantiate(sliderPrefab, container);
+                    var sliderUI = Instantiate(AssetManager.SliderSettingCell, container);
                     var text = sliderUI.GetComponentInChildren<TextMeshProUGUI>();
                     var slider = sliderUI.GetComponentInChildren<Slider>();
                     var input = sliderUI.GetComponentInChildren<TMP_InputField>();
@@ -153,7 +152,7 @@ public class SettingsMenu : MonoBehaviour
                 else if (config.SettingType == typeof(int) &&
                          config.Description.AcceptableValues is AcceptableValueRange<int> intValues)
                 {
-                    var sliderUI = Instantiate(sliderPrefab, container);
+                    var sliderUI = Instantiate(AssetManager.SliderSettingCell, container);
                     var text = sliderUI.GetComponentInChildren<TextMeshProUGUI>();
                     var slider = sliderUI.GetComponentInChildren<Slider>();
                     var input = sliderUI.GetComponentInChildren<TMP_InputField>();
@@ -173,7 +172,7 @@ public class SettingsMenu : MonoBehaviour
                 }
                 else if (config.SettingType == typeof(bool))
                 {
-                    var boolUI = Instantiate(boolPrefab, container);
+                    var boolUI = Instantiate(AssetManager.BooleanSettingCell, container);
                     var text = boolUI.GetComponentInChildren<TextMeshProUGUI>();
                     var dropdown = boolUI.GetComponentInChildren<TMP_Dropdown>();
                     var entry = boolUI.GetComponentInChildren<ConfigEntry>();
@@ -184,7 +183,7 @@ public class SettingsMenu : MonoBehaviour
                     
                     dropdown.SetValueWithoutNotify((bool)config.BoxedValue ? 1 : 0);    
                     
-                    uiList.Add(boolUI);                
+                    uiList.Add(boolUI);
                 }
             }
         }
@@ -201,10 +200,106 @@ public class SettingsMenu : MonoBehaviour
         isInitializing = false;
     }
 
+    internal void DisplayControlsSettings(Transform container)
+    {
+        isInitializing = true;
+        
+        var properties = AccessTools.GetPropertyNames(typeof(Controls));
+        var bindings = Plugin.Config.EnableCustomControls.Value
+            ? Binding.LoadFromJson(Plugin.Config.CustomControls.Value)
+            : ControlScheme.GetProfile(InputSystem.DetectControllerProfile());
+        
+        var uiList = new List<GameObject>();
+
+        {
+            var boolUI = Instantiate(AssetManager.BooleanSettingCell, container);
+            var text = boolUI.GetComponentInChildren<TextMeshProUGUI>();
+            var dropdown = boolUI.GetComponentInChildren<TMP_Dropdown>();
+            var entry = boolUI.GetComponentInChildren<ConfigEntry>();
+
+            text.text = "Enable Custom Controls";
+            entry.m_Category = "Internal";
+            entry.m_Name = "EnableCustomControls";
+
+            dropdown.SetValueWithoutNotify(Plugin.Config.EnableCustomControls.Value ? 1 : 0);
+
+            uiList.Add(boolUI);
+        }
+
+        foreach (var name in properties)
+        {
+            if (AccessTools.Property(typeof(Controls), name) is not { } property) continue;
+
+            if (property.PropertyType != typeof(InputSystem.Axis2DControl) &&
+                property.PropertyType != typeof(InputSystem.ButtonControl))
+                continue;
+            
+            var controlUI = Instantiate(AssetManager.ControlSettingCell, container);
+            var entry = controlUI.GetComponent<RemapBinding>();
+
+            entry.settingTitle.text = Utils.PascalToLongString(name);
+            entry.settingName = name;
+            entry.remapHandler = remapHandler;
+            
+            if (property.PropertyType == typeof(InputSystem.Axis2DControl))
+            {
+                entry.isAxisOnly = true;
+            } else if (property.PropertyType == typeof(InputSystem.ButtonControl))
+            {
+                entry.isAxisOnly = false;
+            }
+
+            if (!Plugin.Config.EnableCustomControls.Value)
+            {
+                controlUI.GetComponentInChildren<Button>().interactable = false;
+                controlUI.GetComponentInChildren<Slider>().interactable = false;
+                controlUI.GetComponentInChildren<TMP_InputField>().interactable = false;
+            }
+
+            entry.SetBinding(bindings[name]);
+            
+            uiList.Add(controlUI);
+        }
+        
+        objects = uiList.ToArray();
+
+        foreach (var obj in objects)
+        foreach (var uiSound in obj.GetComponentsInChildren<UI_Sound>(true))
+        {
+            uiSound.hoverSound = hoverSound;
+            uiSound.clickSound = clickSound;
+        }
+
+        isInitializing = false;
+    }
+
+    private void ReloadControlsSettings(bool useCustom)
+    {
+        var bindings = useCustom
+            ? Binding.LoadFromJson(Plugin.Config.CustomControls.Value)
+            : ControlScheme.GetProfile(InputSystem.DetectControllerProfile());
+        
+        foreach (var obj in objects[1..])
+        {
+            var entry = obj.GetComponent<RemapBinding>();
+            entry.SetBinding(bindings[entry.settingName]);
+            
+            obj.GetComponentInChildren<Button>().interactable = useCustom;
+            obj.GetComponentInChildren<Slider>().interactable = useCustom;
+            obj.GetComponentInChildren<TMP_InputField>().interactable = useCustom;
+        }
+        
+        // Reload bindings if we're in game
+        if (VRSession.Instance is {} instance)
+            instance.Controls.ReloadBindings();
+    }
+    
     internal void DestroySettings()
     {
         foreach (var obj in objects)
             Destroy(obj);
+
+        objects = [];
     }
 
     private void SetOpenXRRuntime(int index)
@@ -236,10 +331,14 @@ public class SettingsMenu : MonoBehaviour
         if (isInitializing)
             return;
 
-        if (category == "Internal" && name == "OpenXRRuntimeFile")
+        switch (category)
         {
-            SetOpenXRRuntime((int)value);
-            return;
+            case "Internal" when name == "OpenXRRuntimeFile":
+                SetOpenXRRuntime((int)value);
+                return;
+            case "Internal" when name == "EnableCustomControls":
+                ReloadControlsSettings(Convert.ToBoolean(value));
+                break;
         }
 
         var entry = Plugin.Config.File[category, name];
@@ -268,14 +367,6 @@ public class SettingsMenu : MonoBehaviour
 
         isDirty = true;
     }
-
-    internal void ApplySettings()
-    {
-        if (!isDirty)
-            return;
-        
-        // TODO: Apply settings here when needed (e.g. XR eye resolution scale)
-    }
 }
 
 [CWVRPatch(CWVRPatchTarget.Universal)]
@@ -293,16 +384,17 @@ internal static class SettingsMenuPatches
     [HarmonyPostfix]
     private static void AfterShow(global::SettingsMenu __instance, SettingCategory category)
     {
-        if ((int)category != 3)
-            return;
-        
-        Object.FindObjectOfType<SettingsMenu>().DisplaySettings(__instance.m_settingsContainer);
-    }
+        if ((int)category == 3)
+            Object.FindObjectOfType<SettingsMenu>().DisplayVRSettings(__instance.m_settingsContainer);
 
-    [HarmonyPatch(typeof(MainMenuSettingsPage), nameof(MainMenuSettingsPage.OnBackButtonClicked))]
-    [HarmonyPrefix]
-    private static void OnCloseSettingsPage()
-    {
-        Object.FindObjectOfType<SettingsMenu>().ApplySettings();
+        if (category is SettingCategory.Controls && VRSession.InVR)
+        {
+            foreach (var cell in __instance.m_cells)
+                Object.Destroy(cell.gameObject);
+            
+            __instance.m_cells.Clear();
+            
+            Object.FindObjectOfType<SettingsMenu>().DisplayControlsSettings(__instance.m_settingsContainer);
+        }
     }
 }

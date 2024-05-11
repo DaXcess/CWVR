@@ -9,6 +9,10 @@ internal static class AssetManager
     public static GameObject Keyboard;
     public static GameObject CaptchaKeyboard;
     public static GameObject VRSettingsTab;
+    public static GameObject BooleanSettingCell;
+    public static GameObject EnumSettingCell;
+    public static GameObject SliderSettingCell;
+    public static GameObject ControlSettingCell;
     
     public static Material WhiteMat;
 
@@ -25,6 +29,10 @@ internal static class AssetManager
         Keyboard = assetBundle.LoadAsset<GameObject>("NonNativeKeyboard");
         CaptchaKeyboard = assetBundle.LoadAsset<GameObject>("CaptchaKeyboard");
         VRSettingsTab = assetBundle.LoadAsset<GameObject>("VRSettingsTab");
+        BooleanSettingCell = assetBundle.LoadAsset<GameObject>("BooleanSettingCell");
+        EnumSettingCell = assetBundle.LoadAsset<GameObject>("EnumSettingCell");
+        SliderSettingCell = assetBundle.LoadAsset<GameObject>("SliderSettingCell");
+        ControlSettingCell = assetBundle.LoadAsset<GameObject>("ControlSettingCell");
         
         WhiteMat = assetBundle.LoadAsset<Material>("White");
         

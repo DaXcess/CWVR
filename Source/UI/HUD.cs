@@ -99,6 +99,14 @@ public class HUD : MonoBehaviour
         health.localEulerAngles = Vector3.zero;
         health.localScale = Vector3.one * 2.5f;
         
+        // Days left & Views
+        var statusBar = uiSource.Find("NextStep/List/GameObject");
+        
+        statusBar.transform.SetParent(RightHandCanvas.transform, false);
+        statusBar.localPosition = new Vector3(250, 710, -215);
+        statusBar.localEulerAngles = new Vector3(0, 0, 270);
+        statusBar.localScale = Vector3.one * 2.5f;
+        
         // Hotbar
         var hotbar = uiSource.Find("Hotbar");
         
@@ -135,7 +143,7 @@ public class HUD : MonoBehaviour
         // Player Customizer (if applicable)
         FindObjectOfType<PlayerCustomizer>()?.gameObject.AddComponent<Customizer>();
         
-        ReplaceSettings(interactionUi, stamina, oxygen, health, hotbar);
+        ReplaceCurvedUISettings(interactionUi, stamina, oxygen, health, statusBar, hotbar);
         CreateUICamera();
     }
 
@@ -181,7 +189,10 @@ public class HUD : MonoBehaviour
         cameraData.cameraStack.Add(UICamera);
     }
 
-    private void ReplaceSettings(params Component[] sources)
+    /// <summary>
+    /// Replaces the curved UI settings on a list of objects so that they work properly in VR
+    /// </summary>
+    private void ReplaceCurvedUISettings(params Component[] sources)
     {
         foreach (var source in sources)
         {

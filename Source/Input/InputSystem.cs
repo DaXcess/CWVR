@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.OpenXR.Features.Interactions;
 
 namespace CWVR.Input;
 
@@ -16,12 +16,39 @@ public class InputSystem : MonoBehaviour
     private bool initialized;
     private InputDevice leftController;
     private InputDevice rightController;
-    
+
     private void Awake()
     {
         StartCoroutine(DetectControllers());
     }
 
+    public static string DetectControllerProfile()
+    {
+        var leftController = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+        if (leftController.isValid)
+            return DetectLayout(leftController);
+        
+        var rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+        if (rightController.isValid)
+            return DetectLayout(rightController);
+        
+        string DetectLayout(InputDevice device)
+        {
+            return device.name switch
+            {
+                OculusTouchControllerProfile.kDeviceLocalizedName or HPReverbG2ControllerProfile.kDeviceLocalizedName
+                    or ValveIndexControllerProfile.kDeviceLocalizedName
+                    or MetaQuestTouchProControllerProfile.kDeviceLocalizedName
+                    or KHRSimpleControllerProfile.kDeviceLocalizedName => "default",
+                HTCViveControllerProfile.kDeviceLocalizedName => "htc_vive",
+                MicrosoftMotionControllerProfile.kDeviceLocalizedName => "wmr",
+                _ => "default"
+            };
+        }
+        
+        return "default";
+    }
+    
     private IEnumerator DetectControllers()
     {
         while (true)
@@ -45,7 +72,7 @@ public class InputSystem : MonoBehaviour
     {
         if (!initialized)
             return;
-        
+
         controls.Do(ctrl => ctrl.Update());
     }
 
@@ -59,9 +86,10 @@ public class InputSystem : MonoBehaviour
         };
     }
 
-    public ButtonControl RegisterButtonControl(XRController controller, InputHelpers.Button button)
+    public ButtonControl RegisterButtonControl(XRController controller, InputHelpers.Button button,
+        float deadzone = 0.75f)
     {
-        var control = new ButtonControl(this, controller, button);
+        var control = new ButtonControl(this, controller, button, deadzone);
         controls.Add(control);
 
         return control;
@@ -75,15 +103,17 @@ public class InputSystem : MonoBehaviour
         return control;
     }
 
-    public DirectionalAxisControl RegisterDirectionalAxisControl(XRController controller, InputHelpers.Axis2D axis, DirectionalAxisControl.AxisDirection direction, float deadzone = 0.75f)
+    public void ClearBindings()
     {
-        var control = new DirectionalAxisControl(this, controller, axis, direction, deadzone);
-        controls.Add(control);
-
-        return control;
+        controls.Clear();
     }
 
-    public class ButtonControl(InputSystem inputSystem, XRController controller, InputHelpers.Button button) : InputControl
+    public class ButtonControl(
+        InputSystem inputSystem,
+        XRController controller,
+        InputHelpers.Button button,
+        float deadzone)
+        : InputControl
     {
         private bool isPressed;
         private bool wasPressed;
@@ -105,16 +135,20 @@ public class InputSystem : MonoBehaviour
 
         public void Update()
         {
-            inputSystem.GetController(controller).TryReadSingleValue(button, out var value);
+            inputSystem.GetController(controller).IsPressed(button, out var value, deadzone);
             wasPressed = isPressed;
-            isPressed = value != 0f;
+            isPressed = value;
         }
     }
-    
-    public class Axis2DControl(InputSystem inputSystem, XRController controller, InputHelpers.Axis2D axis, float deadzone = 0f) : InputControl
+
+    public class Axis2DControl(
+        InputSystem inputSystem,
+        XRController controller,
+        InputHelpers.Axis2D axis,
+        float deadzone = 0f) : InputControl
     {
         private Vector2 value;
-    
+
         public Vector2 GetValue()
         {
             return value;
@@ -128,49 +162,6 @@ public class InputSystem : MonoBehaviour
                 value.x = 0;
             if (Mathf.Abs(value.y) < deadzone)
                 value.y = 0;
-        }
-    }
-
-    public class DirectionalAxisControl(
-        InputSystem inputSystem,
-        XRController controller,
-        InputHelpers.Axis2D axis,
-        DirectionalAxisControl.AxisDirection axisDirection,
-        float deadzone = 0.75f) : InputControl
-    {
-        private bool isPressed;
-        private bool wasPressed;
-        
-        public bool Pressed()
-        {
-            return isPressed;
-        }
-
-        public bool PressedDown()
-        {
-            return isPressed && !wasPressed;
-        }
-        
-        public void Update()
-        {
-            inputSystem.GetController(controller).TryReadAxis2DValue(axis, out var value);
-            wasPressed = isPressed;
-            isPressed = axisDirection switch
-            {
-                AxisDirection.Up => value.y > deadzone,
-                AxisDirection.Down => value.y < -deadzone,
-                AxisDirection.Left => value.x < -deadzone,
-                AxisDirection.Right => value.x > deadzone,
-                _ => throw new ArgumentOutOfRangeException(nameof(axisDirection), axisDirection, null)
-            };
-        }
-
-        public enum AxisDirection
-        {
-            Up,
-            Down,
-            Left,
-            Right
         }
     }
 
