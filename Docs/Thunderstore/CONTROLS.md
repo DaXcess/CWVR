@@ -2,6 +2,8 @@
 
 For item swapping, press and hold the "Interact" button, and use "Zoom In" and "Zoom Out" to cycle through your inventory. Item swapping has been made this way as to not interfere with the camera zooming.
 
+### Default (Oculus & Index)
+
 | Action                   | Binding                   |
 |--------------------------|---------------------------|
 | Movement                 | Left Joystick             |
@@ -24,3 +26,5 @@ For item swapping, press and hold the "Interact" button, and use "Zoom In" and "
 | Pivot (Spectating)       | Left Joystick             |
 | Spectate Next Player     | Right Trigger Button      |
 | Spectate Previous Player | Left Trigger Button       |
+
+> Other built-in controller types coming later
