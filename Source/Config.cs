@@ -35,11 +35,6 @@ public class Config(ConfigFile file)
     public ConfigEntry<bool> ToggleSprint { get; } = file.Bind("Input", "ToggleSprint", false,
         "Whether the sprint button should toggle sprint instead of having to hold it down.");
 
-    public ConfigEntry<float> ToggleSprintTimer { get; } = file.Bind("Input", "ToggleSprintTimer", 1f,
-        new ConfigDescription(
-            "The amount of seconds that you need to stand still for sprint to be toggled off automatically. Requires sprint toggle to be enabled.",
-            new AcceptableValueRange<float>(0, 10)));
-
     // Internal configuration
 
     public ConfigEntry<bool> FirstTimeLaunch { get; } = file.Bind("Internal", "FirstTimeLaunch", true,
@@ -47,6 +42,12 @@ public class Config(ConfigFile file)
 
     public ConfigEntry<string> OpenXRRuntimeFile { get; } = file.Bind("Internal", "OpenXRRuntimeFile", "",
         "Overrides the OpenXR plugin to use a specific json file. For internal use only.");
+
+    public ConfigEntry<bool> EnableCustomControls { get; } = file.Bind("Internal", "EnableCustomControls", false,
+        "Whether or not to use a customized control schema");
+
+    public ConfigEntry<string> CustomControls { get; } =
+        file.Bind("Internal", "CustomControls", "", "The custom control schema to use");
     
     public enum TurnProviderOption
     {

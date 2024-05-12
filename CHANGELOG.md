@@ -1,3 +1,13 @@
+# 1.0.1
+
+**Time for more controllers!**
+
+The most important part of this update is control rebinding. Controllers with specialized layouts (like the HTC vive or WMR) we're not able to play CWVR. Now you can go into the settings and change the bindings to your needs.
+
+- Replaced the `Controls` menu in the settings with VR controls, that can be rebound at any time, whether you are in-game or not
+- Fixed the defibrillator not using VR controls as input
+- Fixed the quota and views UI not being visible
+
 # 1.0.0
 
 **Time to get SpöökFamous!!**

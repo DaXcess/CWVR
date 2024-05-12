@@ -69,5 +69,15 @@ namespace CWVR.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] controls {
+            get {
+                object obj = ResourceManager.GetObject("controls", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

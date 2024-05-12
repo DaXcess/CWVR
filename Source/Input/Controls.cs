@@ -1,86 +1,43 @@
+using HarmonyLib;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
 using Axis2DControl = CWVR.Input.InputSystem.Axis2DControl;
 using ButtonControl = CWVR.Input.InputSystem.ButtonControl;
-using XRController = CWVR.Input.InputSystem.XRController;
-using DirectionalAxisControl = CWVR.Input.InputSystem.DirectionalAxisControl;
 
 namespace CWVR.Input;
 
-// TODO: Configurable?
 public class Controls(InputSystem inputSystem)
 {
-    public Axis2DControl Movement { get; } =
-        inputSystem.RegisterAxis2DControl(XRController.Left, InputHelpers.Axis2D.PrimaryAxis2D);
-
-    public ButtonControl Jump { get; } =
-        inputSystem.RegisterButtonControl(XRController.Right, InputHelpers.Button.PrimaryButton);
-
-    public ButtonControl Sprint { get; } =
-        inputSystem.RegisterButtonControl(XRController.Left, InputHelpers.Button.Primary2DAxisClick);
-
-    public ButtonControl Crouch { get; } =
-        inputSystem.RegisterButtonControl(XRController.Right, InputHelpers.Button.Primary2DAxisClick);
-
-    public ButtonControl Interact { get; } =
-        inputSystem.RegisterButtonControl(XRController.Right, InputHelpers.Button.GripButton);
-
-    public ButtonControl Use { get; } =
-        inputSystem.RegisterButtonControl(XRController.Right, InputHelpers.Button.TriggerButton);
-
-    public ButtonControl Drop { get; } =
-        inputSystem.RegisterButtonControl(XRController.Right, InputHelpers.Button.SecondaryButton);
-
-    public ButtonControl FlipCamera { get; } =
-        inputSystem.RegisterButtonControl(XRController.Left, InputHelpers.Button.GripButton);
-
-    public ButtonControl Menu { get; } =
-        inputSystem.RegisterButtonControl(XRController.Left, InputHelpers.Button.PrimaryButton);
-
-    public ButtonControl ResetHeight { get; } =
-        inputSystem.RegisterButtonControl(XRController.Left, InputHelpers.Button.SecondaryButton);
-
-    public DirectionalAxisControl ZoomIn { get; } = inputSystem.RegisterDirectionalAxisControl(XRController.Right,
-        InputHelpers.Axis2D.PrimaryAxis2D, DirectionalAxisControl.AxisDirection.Up);
-
-    public DirectionalAxisControl ZoomOut { get; } = inputSystem.RegisterDirectionalAxisControl(XRController.Right,
-        InputHelpers.Axis2D.PrimaryAxis2D, DirectionalAxisControl.AxisDirection.Down);
-
+    public Axis2DControl Movement { get; private set; }
+    public ButtonControl Jump { get; private set; }
+    public ButtonControl Sprint { get; private set; }
+    public ButtonControl Crouch { get; private set; }
+    public ButtonControl Interact { get; private set; }
+    public ButtonControl Use { get; private set; }
+    public ButtonControl Drop { get; private set; }
+    public ButtonControl FlipCamera { get; private set; }
+    public ButtonControl Menu { get; private set; }
+    public ButtonControl ResetHeight { get; private set; }
+    public ButtonControl ZoomIn { get; private set; }
+    public ButtonControl ZoomOut { get; private set; }
 
     // Turning
 
-    public DirectionalAxisControl TurnLeft { get; } =
-        inputSystem.RegisterDirectionalAxisControl(XRController.Right, InputHelpers.Axis2D.PrimaryAxis2D,
-            DirectionalAxisControl.AxisDirection.Left);
-
-    public DirectionalAxisControl TurnRight { get; } =
-        inputSystem.RegisterDirectionalAxisControl(XRController.Right, InputHelpers.Axis2D.PrimaryAxis2D,
-            DirectionalAxisControl.AxisDirection.Right);
+    public ButtonControl TurnLeft { get; private set; }
+    public ButtonControl TurnRight { get; private set; }
 
     // Modal
 
-    public DirectionalAxisControl ModalLeft { get; } = inputSystem.RegisterDirectionalAxisControl(XRController.Left,
-        InputHelpers.Axis2D.PrimaryAxis2D, DirectionalAxisControl.AxisDirection.Left);
-
-    public DirectionalAxisControl ModalRight { get; } = inputSystem.RegisterDirectionalAxisControl(XRController.Left,
-        InputHelpers.Axis2D.PrimaryAxis2D, DirectionalAxisControl.AxisDirection.Right);
-
-    public ButtonControl ModalPress { get; } = inputSystem.RegisterButtonControl(XRController.Right,
-        InputHelpers.Button.PrimaryButton);
+    public ButtonControl ModalLeft { get; private set; }
+    public ButtonControl ModalRight { get; private set; }
+    public ButtonControl ModalPress { get; private set; }
 
     // Spectating
 
-    public Axis2DControl Pivot { get; } =
-        inputSystem.RegisterAxis2DControl(XRController.Left, InputHelpers.Axis2D.PrimaryAxis2D);
-
-    public ButtonControl SpectateNext { get; } =
-        inputSystem.RegisterButtonControl(XRController.Right, InputHelpers.Button.TriggerButton);
-
-    public ButtonControl SpectatePrevious { get; } =
-        inputSystem.RegisterButtonControl(XRController.Left, InputHelpers.Button.TriggerButton);
+    public Axis2DControl Pivot { get; private set; }
+    public ButtonControl SpectateNext { get; private set; }
+    public ButtonControl SpectatePrevious { get; private set; }
 
     private bool toggleSprintState;
-    private float timeNotMoved;
 
     public void SampleInput(global::Player.PlayerInput input, global::Player.PlayerData data, global::Player player)
     {
@@ -97,11 +54,6 @@ public class Controls(InputSystem inputSystem)
             input.movementInput =
                 Vector2.Lerp(input.movementInput, data.overrideMovementInput, data.inputOverideAmount);
 
-        if (input.movementInput == Vector2.zero)
-            timeNotMoved += Time.deltaTime;
-        else
-            timeNotMoved = 0;
-
         input.escapeWasPressed = Menu.PressedDown();
 
         if (data.inputOverideAmount > 0.99f)
@@ -115,8 +67,7 @@ public class Controls(InputSystem inputSystem)
                     toggleSprintState = !toggleSprintState;
 
                 if (player.data.staminaDepleated ||
-                    (input.movementInput.y <= 0.1f && !player.refs.controller.canSprintInAnyDirection) ||
-                    timeNotMoved > Plugin.Config.ToggleSprintTimer.Value)
+                    (input.movementInput.y <= 0.1f && !player.refs.controller.canSprintInAnyDirection))
                     toggleSprintState = false;
 
                 input.sprintIsPressed = toggleSprintState;
@@ -147,5 +98,26 @@ public class Controls(InputSystem inputSystem)
         input.dropItemWasReleased = Drop.Released();
         input.dropItemIsPressed = Drop.Pressed();
         input.toggleCameraFlipWasPressed = FlipCamera.PressedDown();
+    }
+
+    public void ReloadBindings()
+    {
+        inputSystem.ClearBindings();
+
+        foreach (var (name, binding) in ControlScheme.Scheme)
+        {
+            if (AccessTools.Property(typeof(Controls), name) is not { } property) continue;
+            
+            if (property.PropertyType == typeof(Axis2DControl) && binding.axis is not null)
+            {
+                property.SetValue(this,
+                    inputSystem.RegisterAxis2DControl(binding.controller, binding.axis.Value, binding.deadzone));
+            }
+            else if (property.PropertyType == typeof(ButtonControl) && binding.button is not null)
+            {
+                property.SetValue(this,
+                    inputSystem.RegisterButtonControl(binding.controller, binding.button.Value, binding.deadzone));
+            }
+        }
     }
 }
