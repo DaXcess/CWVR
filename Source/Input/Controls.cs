@@ -1,3 +1,4 @@
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 using Axis2DControl = CWVR.Input.InputSystem.Axis2DControl;
@@ -37,6 +38,10 @@ public class Controls(InputSystem inputSystem)
     public ButtonControl SpectateNext { get; private set; }
     public ButtonControl SpectatePrevious { get; private set; }
 
+    public static string[] ControlNames => AccessTools.GetDeclaredProperties(typeof(Controls))
+        .Where(prop => prop.PropertyType == typeof(ButtonControl) || prop.PropertyType == typeof(Axis2DControl))
+        .Select(prop => prop.Name).ToArray();
+    
     private bool toggleSprintState;
 
     public void SampleInput(global::Player.PlayerInput input, global::Player.PlayerData data, global::Player player)

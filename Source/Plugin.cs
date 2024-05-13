@@ -5,29 +5,32 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using BepInEx;
+using BepInEx.Bootstrap;
 using CWVR.Assets;
 using CWVR.Patches;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
 using UnityEngine.XR.OpenXR;
 using UnityEngine.XR.OpenXR.Features.Interactions;
+using DependencyFlags = BepInEx.BepInDependency.DependencyFlags;
 
 namespace CWVR;
 
 [ContentWarningPlugin(PLUGIN_GUID, PLUGIN_VERSION, true)]
 [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
+[BepInDependency("CommanderCat101.ContentSettings", DependencyFlags.SoftDependency)]
 public class Plugin : BaseUnityPlugin
 {
     private const string PLUGIN_GUID = "io.daxcess.cwvr";
     private const string PLUGIN_NAME = "CWVR";
-    private const string PLUGIN_VERSION = "1.0.1";
+    private const string PLUGIN_VERSION = "1.0.2";
     
     private const string BANNER = "                             ,--.,--.                         \n ,-----.,--.   ,--.         /  //  /     ,--.   ,--.,------.  \n'  .--./|  |   |  |        /  //  /       \\  `.'  / |  .--. ' \n|  |    |  |.'.|  |       /  //  /         \\     /  |  '--'.' \n'  '--'\\|   ,'.   |      /  //  /           \\   /   |  |\\  \\  \n `-----''--'   '--'     /  //  /             `-'    `--' '--' \n                       `--'`--'                               \n\n             ___________________________ \n            < Another VR mod by DaXcess >\n             --------------------------- \n                    \\   ^__^\n                     \\  (oo)\\_______\n                        (__)\\       )\\/\\\n                            ||----w |\n                            ||     ||\n";
 
     public new static Config Config { get; private set; }
+    public static Compat Compatibility { get; private set; }
     public static Flags Flags { get; private set; } = 0;
 
     private void Awake()
@@ -36,6 +39,7 @@ public class Plugin : BaseUnityPlugin
         CWVR.Logger.SetSource(Logger);
 
         Config = new Config(base.Config);
+        Compatibility = new Compat([.. Chainloader.PluginInfos.Values]);
         
         foreach (var line in BANNER.Split('\n'))
             Logger.LogInfo($"   {line}");

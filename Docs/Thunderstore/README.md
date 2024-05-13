@@ -45,6 +45,12 @@ CW // VR comes pre-packaged with a digital signature. You can use tools like GPG
 
 The public key which can be used to verify the file is [9422426F6125277B82CC477DCF78CC72F0FD5EAD (OpenPGP Key Server)](https://keys.openpgp.org/vks/v1/by-fingerprint/9422426F6125277B82CC477DCF78CC72F0FD5EAD).
 
+### Discord Server
+
+We have a dedicated section within the [Flat2VR Discord Server](https://discord.com/invite/ZFSCSDe)!
+
+Look for the [`#cw-join`](https://discord.com/channels/747967102895390741/1236717861653712896) channel to join the Content Warning VR section.
+
 # Configuring the mod
 
 You can change the mod configuration from within the game itself. Just launch the game with the VR mod installed, get to the main menu, go to the settings and press "VR Settings". In here you can configure the VR mod to your liking.

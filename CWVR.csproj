@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>CWVR</AssemblyName>
     <Description>Recording creatures in VR</Description>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <Title>ContentWarningVR</Title>
@@ -22,6 +22,7 @@
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
+    <PackageReference Include="CommanderCat101.ContentSettings" Version="1.2.2" />
     <PackageReference Include="ContentWarning" Version="1.12.0" />
     <PackageReference Include="CW.Zorro" Version="1.8.0" />
     <PackageReference Include="HBAO.Universal" Version="1.9.0-cw" />
