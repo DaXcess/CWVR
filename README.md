@@ -12,6 +12,12 @@ CW // VR is a [BepInEx](https://docs.bepinex.dev/) mod that adds fully fledged, 
 
 This mod, just like my Lethal Company VR mod, is powered by Unity's OpenXR plugin, and is thereby compatible with a wide range of headsets and runtimes, like Oculus, Virtual Desktop, SteamVR and many more!
 
+### Discord Server
+
+We have a dedicated section within the [Flat2VR Discord Server](https://discord.com/invite/ZFSCSDe)!
+
+Look for the [`#cw-join`](https://discord.com/channels/747967102895390741/1236717861653712896) channel to join the Content Warning VR section.
+
 # Install from source
 
 To install the mod from the source code, you will first have to compile the mod. Instructions for this are available in [COMPILING.md](COMPILING.md).
