@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Newtonsoft.Json;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -71,8 +73,30 @@ public struct Binding
 
     public float deadzone;
 
+    /// <summary>
+    /// Load a set of bindings from JSON. Will fall back to default/detected controller profile if loading fails.
+    /// </summary>
     public static Dictionary<string, Binding> LoadFromJson(string json)
     {
-        return JsonConvert.DeserializeObject<Dictionary<string, Binding>>(json);
+        try
+        {
+            if (string.IsNullOrEmpty(json))
+                throw new InvalidDataException(
+                    "Empty schema provided (this is normal when you are first setting up custom controls)");
+
+            var bindings = JsonConvert.DeserializeObject<Dictionary<string, Binding>>(json);
+
+            foreach (var control in Controls.ControlNames)
+                if (!bindings.ContainsKey(control))
+                    throw new InvalidDataException($"Provided control scheme is missing control entry: {control}");
+
+            return bindings;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning($"Failed to load bindings: {ex.Message}");
+
+            return new Dictionary<string, Binding>(ControlScheme.GetProfile(InputSystem.DetectControllerProfile()));
+        }
     }
 }

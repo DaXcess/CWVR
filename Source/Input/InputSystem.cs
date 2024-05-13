@@ -22,8 +22,11 @@ public class InputSystem : MonoBehaviour
         StartCoroutine(DetectControllers());
     }
 
+    // TODO: Remove return statement once built-in profiles for htc and wmr are available
     public static string DetectControllerProfile()
     {
+        return "default";
+        
         var leftController = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
         if (leftController.isValid)
             return DetectLayout(leftController);
@@ -31,7 +34,9 @@ public class InputSystem : MonoBehaviour
         var rightController = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
         if (rightController.isValid)
             return DetectLayout(rightController);
-        
+
+        return "default";
+
         string DetectLayout(InputDevice device)
         {
             return device.name switch
@@ -45,8 +50,6 @@ public class InputSystem : MonoBehaviour
                 _ => "default"
             };
         }
-        
-        return "default";
     }
     
     private IEnumerator DetectControllers()
