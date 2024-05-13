@@ -370,6 +370,14 @@ public class SettingsMenu : MonoBehaviour
 
         isDirty = true;
     }
+
+    public void MenuClosed()
+    {
+        if (!isDirty)
+            return;
+        
+        // Do cleanup tasks and apply settings
+    }
 }
 
 [CWVRPatch(CWVRPatchTarget.Universal)]

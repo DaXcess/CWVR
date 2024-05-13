@@ -9,7 +9,7 @@ namespace CWVR.UI.Settings;
 
 public class RemapBinding : MonoBehaviour
 {
-    [SerializeField] internal TextMeshProUGUI settingTitle;
+    [SerializeField] internal TextMeshProUGUI settingTitle = null;
     [SerializeField] internal string settingName;
  
     private Button button;

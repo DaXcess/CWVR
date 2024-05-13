@@ -27,6 +27,7 @@ public class InputSystem : MonoBehaviour
     {
         return "default";
         
+#pragma warning disable CS0162 // Unreachable code detected
         var leftController = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
         if (leftController.isValid)
             return DetectLayout(leftController);
@@ -36,6 +37,7 @@ public class InputSystem : MonoBehaviour
             return DetectLayout(rightController);
 
         return "default";
+#pragma warning restore CS0162 // Unreachable code detected
 
         string DetectLayout(InputDevice device)
         {

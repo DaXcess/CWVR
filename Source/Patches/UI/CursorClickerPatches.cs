@@ -68,7 +68,9 @@ internal static class CursorClickerPatches
         var screenPosition = MainCamera.instance.cam.WorldToScreenPoint(position);
         var ed = new PointerEventData(me)
         {
+#pragma warning disable Harmony003
             position = screenPosition
+#pragma warning restore Harmony003
         };
         
         hits = [];
