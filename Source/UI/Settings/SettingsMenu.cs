@@ -29,14 +29,17 @@ public class SettingsMenu : MonoBehaviour
     
     private void Awake()
     {
-        // Grab references to original working tabs
-        var tabs = GetComponentInChildren<CW_TABS>();
-        var tab = tabs.GetComponentInChildren<CW_TAB>();
+        // Grab sound effects from another UI element
+        var button = FindObjectOfType<EscapeMenuButton>();
 
-        hoverSound = tab.hoverSound;
-        clickSound = tab.clickSound;
+        hoverSound = button.hoverSound;
+        clickSound = button.clickSound;
         
+        if (Plugin.Compatibility.IsLoaded("ContentSettings"))
+            return;
+
         // Create settings tab
+        var tabs = GetComponentInChildren<CW_TABS>();
         var settingsTabObj = Instantiate(AssetManager.VRSettingsTab, tabs.transform);
         var settingsTab = settingsTabObj.GetComponent<CW_TAB>();
         var settingsCatTabVr = settingsTabObj.GetComponent<SettingCategoryTab>();
@@ -45,7 +48,7 @@ public class SettingsMenu : MonoBehaviour
         settingsTab.clickSound = clickSound;
         settingsCatTabVr.settingsMenu = global::SettingsMenu.Instance;
     }
-
+    
     private GameObject[] objects = [];
 
     internal void DisplayVRSettings(Transform container)

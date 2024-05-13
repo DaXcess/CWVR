@@ -29,8 +29,7 @@ internal static class HarmonyPatcher
                 if (attribute is null)
                     return;
 
-                // TODO: Add compatibility module
-                if (attribute.Dependency != null)
+                if (attribute.Dependency != null && !Plugin.Compatibility.IsLoaded(attribute.Dependency))
                     return;
 
                 if (attribute.Target == target)

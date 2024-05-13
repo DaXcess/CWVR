@@ -1,7 +1,8 @@
 # 1.0.2
 
 - Hotfix for custom controls
-- TODO
+- Fixed UI interactions not working for the sponsors monitors
+- Added compatibility with ContentSettings
 
 # 1.0.1
 
