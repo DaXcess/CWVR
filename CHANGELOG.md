@@ -1,3 +1,8 @@
+# 1.0.2
+
+- Hotfix for custom controls
+- TODO
+
 # 1.0.1
 
 **Time for more controllers!**
