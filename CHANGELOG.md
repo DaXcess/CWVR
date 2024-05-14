@@ -1,3 +1,8 @@
+# 1.0.3
+
+- Added a temporary patch to prevent Content Warning from breaking soft dependencies
+- QoL improvements to settings menu
+
 # 1.0.2
 
 - Hotfix for custom controls

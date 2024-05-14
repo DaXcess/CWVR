@@ -53,6 +53,8 @@ public class SettingsMenu : MonoBehaviour
 
     internal void DisplayVRSettings(Transform container)
     {
+        DestroySettings();
+        
         isInitializing = true;
         
         var categories = new Dictionary<string, List<KeyValuePair<ConfigDefinition, ConfigEntryBase>>>();
@@ -205,6 +207,8 @@ public class SettingsMenu : MonoBehaviour
 
     internal void DisplayControlsSettings(Transform container)
     {
+        DestroySettings();
+        
         isInitializing = true;
         
         var properties = AccessTools.GetPropertyNames(typeof(Controls));

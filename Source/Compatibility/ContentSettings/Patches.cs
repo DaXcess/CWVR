@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using ContentSettings.API;
 using ContentSettings.API.Settings.UI;
 using CWVR.Patches;
@@ -49,7 +50,7 @@ internal static class ContentSettingsPatches
         #nullable enable
         var settingsNavigationNullable = (SettingsNavigation?)AccessTools.PropertyGetter(typeof(SettingsLoader), "SettingsNavigation").Invoke(null, []);
 
-        __state = settingsNavigationNullable is null;
+        __state = settingsNavigationNullable == null;
     }
 
     [HarmonyPatch(typeof(SettingsLoader), "CreateSettingsMenu")]
@@ -58,10 +59,13 @@ internal static class ContentSettingsPatches
     {
         if (!__state)
             return;
-        
-        #nullable enable
-        var settingsNavigationNullable = (SettingsNavigation?)AccessTools.PropertyGetter(typeof(SettingsLoader), "SettingsNavigation").Invoke(null, []);
 
+        var settingsNavigationNullable =
+            (SettingsNavigation?)AccessTools.PropertyGetter(typeof(SettingsLoader), "SettingsNavigation")
+                .Invoke(null, []);
         settingsNavigationNullable?.Create("VR SETTINGS");
+
+        if (VRSession.Instance != null && VRSession.InVR)
+            settingsNavigationNullable?.transform.parent.parent.parent.gameObject.SetLayerRecursive(6);
     }
 }
