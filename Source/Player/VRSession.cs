@@ -35,6 +35,13 @@ public class VRSession : MonoBehaviour
         
         if (InVR)
             InitializeVRSession();
+        
+        // Add VR settings to pause menu
+        var settingsObj = FindObjectOfType<EscapeMenuSettingsPage>(true).gameObject;
+        var settingsMenu = settingsObj.AddComponent<UI.Settings.SettingsMenu>();
+        var remapHandler = settingsObj.AddComponent<RemapHandler>();
+
+        settingsMenu.remapHandler = remapHandler;
     }
 
     private void InitializeVRSession()
@@ -50,14 +57,7 @@ public class VRSession : MonoBehaviour
         LocalPlayer = global::Player.localPlayer.gameObject.AddComponent<VRPlayer>();
         
         // Create HUD
-        HUD = gameObject.AddComponent<HUD>();        
-        
-        // Add VR settings to pause menu
-        var settingsObj = FindObjectOfType<EscapeMenuSettingsPage>(true).gameObject;
-        var settingsMenu = settingsObj.AddComponent<UI.Settings.SettingsMenu>();
-        var remapHandler = settingsObj.AddComponent<RemapHandler>();
-
-        settingsMenu.remapHandler = remapHandler;
+        HUD = gameObject.AddComponent<HUD>();
         
         // Load controller bindings
         if (Plugin.Config.EnableCustomControls.Value)
