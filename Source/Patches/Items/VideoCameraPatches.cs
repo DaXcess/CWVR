@@ -53,6 +53,9 @@ internal static class VideoCameraPatches
             (false, false) => 0,
         };
 
+        if (Plugin.Config.InteractToZoom.Value && !controls.Interact.Pressed())
+            sign = 0;
+
         __instance.m_zoomLevel += Time.deltaTime * sign;
     }
 

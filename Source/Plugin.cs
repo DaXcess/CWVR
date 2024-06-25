@@ -25,7 +25,7 @@ public class Plugin : BaseUnityPlugin
 {
     private const string PLUGIN_GUID = "io.daxcess.cwvr";
     private const string PLUGIN_NAME = "CWVR";
-    private const string PLUGIN_VERSION = "1.0.3";
+    private const string PLUGIN_VERSION = "1.0.4";
     
     private const string BANNER = "                             ,--.,--.                         \n ,-----.,--.   ,--.         /  //  /     ,--.   ,--.,------.  \n'  .--./|  |   |  |        /  //  /       \\  `.'  / |  .--. ' \n|  |    |  |.'.|  |       /  //  /         \\     /  |  '--'.' \n'  '--'\\|   ,'.   |      /  //  /           \\   /   |  |\\  \\  \n `-----''--'   '--'     /  //  /             `-'    `--' '--' \n                       `--'`--'                               \n\n             ___________________________ \n            < Another VR mod by DaXcess >\n             --------------------------- \n                    \\   ^__^\n                     \\  (oo)\\_______\n                        (__)\\       )\\/\\\n                            ||----w |\n                            ||     ||\n";
 

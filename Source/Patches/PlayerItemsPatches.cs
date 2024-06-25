@@ -37,8 +37,13 @@ internal static class PlayerItemsPatches
 
         var controls = VRSession.Instance.Controls;
 
-        if (!controls.Interact.Pressed())
-            return;
+
+        switch (Plugin.Config.InteractToZoom.Value)
+        {
+            case true when controls.Interact.Pressed():
+            case false when !controls.Interact.Pressed():
+                return;
+        }
         
         if (controls.ZoomIn.PressedDown())
             __instance.player.data.selectedItemSlot = (__instance.player.data.selectedItemSlot + 1 + TOTAL_SLOTS) % TOTAL_SLOTS;

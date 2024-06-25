@@ -35,6 +35,9 @@ public class Config(ConfigFile file)
     public ConfigEntry<bool> ToggleSprint { get; } = file.Bind("Input", "ToggleSprint", false,
         "Whether the sprint button should toggle sprint instead of having to hold it down.");
 
+    public ConfigEntry<bool> InteractToZoom { get; } = file.Bind("Input", "InteractToZoom", false,
+        "Require holding the interact button to zoom the camera. Removes the need to hold interact to swap items.");
+
     // Internal configuration
 
     public ConfigEntry<bool> FirstTimeLaunch { get; } = file.Bind("Internal", "FirstTimeLaunch", true,
