@@ -89,8 +89,10 @@ public class Controls(InputSystem inputSystem)
             input.clickIsPressed = Use.Pressed();
             input.clickWasReleased = Use.Released();
         }
+        
+        var strangled = data.strangledForSeconds > 0f;
 
-        if (!player.HasLockedMovement())
+        if (!player.HasLockedMovement() && !strangled)
         {
             input.jumpWasPressed = Jump.PressedDown();
             input.jumpIsPressed = Jump.Pressed();
@@ -98,10 +100,14 @@ public class Controls(InputSystem inputSystem)
             input.crouchIsPressed = Crouch.Pressed();
         }
 
-        input.interactWasPressed = Interact.PressedDown();
-        input.dropItemWasPressed = Drop.PressedDown();
-        input.dropItemWasReleased = Drop.Released();
-        input.dropItemIsPressed = Drop.Pressed();
+        if (!strangled)
+        {
+            input.interactWasPressed = Interact.PressedDown();
+            input.dropItemWasPressed = Drop.PressedDown();
+            input.dropItemWasReleased = Drop.Released();
+            input.dropItemIsPressed = Drop.Pressed();
+        }
+
         input.toggleCameraFlipWasPressed = FlipCamera.PressedDown();
     }
 
