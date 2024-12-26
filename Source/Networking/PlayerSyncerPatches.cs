@@ -11,7 +11,6 @@ using static HarmonyLib.AccessTools;
 namespace CWVR.Networking;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class PlayerSyncerPatches
 {
     /// <summary>
@@ -98,7 +97,6 @@ internal static class PlayerSyncerPatches
 }
 
 [CWVRPatch(CWVRPatchTarget.Universal)]
-[HarmonyPatch]
 internal static class UniversalPlayerSyncerPatches
 {
     /// <summary>

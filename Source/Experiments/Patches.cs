@@ -5,7 +5,6 @@ namespace CWVR.Experiments;
 
 #if DEBUG
 [CWVRPatch(CWVRPatchTarget.Universal)]
-[HarmonyPatch]
 internal static class Patches
 {
     /// <summary>

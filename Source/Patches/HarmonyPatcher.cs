@@ -29,11 +29,13 @@ internal static class HarmonyPatcher
                 if (attribute is null)
                     return;
 
-                if (attribute.Dependency != null && !Plugin.Compatibility.IsLoaded(attribute.Dependency))
+                if (attribute.Target != target)
                     return;
 
-                if (attribute.Target == target)
-                    patcher.CreateClassProcessor(type).Patch();
+                if (attribute.Loader == LoaderTarget.Both ||
+                    (attribute.Loader == LoaderTarget.BepInEx && Plugin.Loader == Loader.BepInEx) ||
+                    (attribute.Loader == LoaderTarget.Workshop && Plugin.Loader == Loader.Workshop))
+                    patcher.CreateClassProcessor(type, true).Patch();
             }
             catch (Exception e)
             {
@@ -43,14 +45,23 @@ internal static class HarmonyPatcher
     }
 }
 
-internal class CWVRPatchAttribute(CWVRPatchTarget target = CWVRPatchTarget.VROnly, string dependency = null) : Attribute
+internal class CWVRPatchAttribute(
+    CWVRPatchTarget target = CWVRPatchTarget.VROnly,
+    LoaderTarget loader = LoaderTarget.Both) : Attribute
 {
     public CWVRPatchTarget Target { get; } = target;
-    public string Dependency { get; } = dependency;
+    public LoaderTarget Loader { get; } = loader;
 }
 
 internal enum CWVRPatchTarget
 {
     Universal,
     VROnly
+}
+
+internal enum LoaderTarget
+{
+    BepInEx,
+    Workshop,
+    Both
 }

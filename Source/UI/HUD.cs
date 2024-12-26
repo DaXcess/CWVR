@@ -1,4 +1,3 @@
-using System;
 using CurvedUI;
 using CWVR.Player;
 using TMPro;

@@ -4,7 +4,6 @@ using HarmonyLib;
 namespace CWVR.Patches;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class BedPatches
 {
     [HarmonyPatch(typeof(Bed), nameof(Bed.RPCA_AcceptSleep))]

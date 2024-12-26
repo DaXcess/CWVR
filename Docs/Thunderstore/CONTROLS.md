@@ -1,6 +1,7 @@
 # Controls
 
-For item swapping, press and hold the "Interact" button, and use "Zoom In" and "Zoom Out" to cycle through your inventory. Item swapping has been made this way as to not interfere with the camera zooming.
+To zoom the camera, press and hold the "Interact" button, and use "Zoom In" and "Zoom Out". 
+You can toggle this behavior in the settings.
 
 ### Default (Oculus & Index)
 
@@ -20,8 +21,8 @@ For item swapping, press and hold the "Interact" button, and use "Zoom In" and "
 | Zoom Out                 | Right Joystick Down       |
 | Turn Left                | Right Joystick Left       |
 | Turn Right               | Right Joystick Right      |
-| Modal Left               | Left Joystick Left        |
-| Modal Right              | Left Joystick Right       |
+| Modal Left               | Right Joystick Left       |
+| Modal Right              | Right Joystick Right      |
 | Modal Press              | A                         |
 | Pivot (Spectating)       | Left Joystick             |
 | Spectate Next Player     | Right Trigger Button      |

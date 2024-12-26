@@ -1,4 +1,5 @@
-using CWVR.Player;
+using System;
+using CWVR.Input;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
@@ -6,7 +7,6 @@ using UnityEngine;
 namespace CWVR.Patches.Items;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class VideoCameraPatches
 {
     private static TextMeshProUGUI filmText;
@@ -41,19 +41,18 @@ internal static class VideoCameraPatches
     [HarmonyPrefix]
     private static void BeforeUpdate(VideoCamera __instance)
     {
-        var controls = VRSession.Instance.Controls;
-        
         if (!__instance.isHeldByMe || !GlobalInputHandler.CanTakeInput())
             return;
         
-        var sign = (controls.ZoomIn.Pressed(), controls.ZoomOut.Pressed()) switch
+        var sign = Actions.Instance["Zoom - Swap"].ReadValue<float>() switch
         {
-            (true, _) => 1,
-            (_, true) => -1,
-            (false, false) => 0,
+            > 0 => 1,
+            < 0 => -1,
+            0 => 0,
+            _ => throw new ArgumentOutOfRangeException()
         };
 
-        if (Plugin.Config.InteractToZoom.Value && !controls.Interact.Pressed())
+        if (Plugin.Config.InteractToZoom.Value && !Actions.Instance["Interact"].IsPressed())
             sign = 0;
 
         __instance.m_zoomLevel += Time.deltaTime * sign;

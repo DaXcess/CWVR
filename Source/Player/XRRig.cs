@@ -116,10 +116,8 @@ public class XRRig : MonoBehaviour
         }
 
         // Detect reset height
-        if (VRSession.Instance.Controls.ResetHeight.PressedDown())
-        {
+        if (Actions.Instance["ResetHeight"].WasPressedThisFrame())
             ResetHeight();
-        }
     }
 
     private void LateUpdate()
@@ -165,8 +163,6 @@ public class XRRig : MonoBehaviour
         if (global::Player.observedPlayer == null)
             return;
 
-        var controls = VRSession.Instance.Controls;
-
         transform.rotation = Quaternion.LookRotation(spectate.lookDirection);
         transform.position = global::Player.observedPlayer.TransformCenter() + Vector3.up * 0.75f +
                              new Vector3(originOffset.x, 0, originOffset.y);
@@ -179,7 +175,7 @@ public class XRRig : MonoBehaviour
         else
             transform.position = vector + transform.forward * 0.2f;
 
-        var pivot = controls.Pivot.GetValue() * 3;
+        var pivot = Actions.Instance["Pivot"].ReadValue<Vector2>() * 3;
 
         // Move origin back to "center" while camera is being pivotted
         if (pivot.x > 0 || pivot.y > 0)
@@ -196,9 +192,9 @@ public class XRRig : MonoBehaviour
 
         transform.eulerAngles = new Vector3(0, rotationOffset, 0);
 
-        if (controls.SpectateNext.PressedDown())
+        if (Actions.Instance["Spectate Next"].WasPressedThisFrame())
             global::Player.observedPlayer = PlayerHandler.instance.GetNextPlayerAlive(global::Player.observedPlayer, 1);
-        else if (controls.SpectatePrevious.PressedDown())
+        else if (Actions.Instance["Spectate Previous"].WasPressedThisFrame())
             global::Player.observedPlayer =
                 PlayerHandler.instance.GetNextPlayerAlive(global::Player.observedPlayer, -1);
     }

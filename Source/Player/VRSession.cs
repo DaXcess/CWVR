@@ -1,9 +1,9 @@
-using System;
-using CWVR.Input;
+using CWVR.Assets;
 using CWVR.Networking;
 using CWVR.UI;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using UnityEngine.InputSystem.UI;
+using Zorro.ControllerSupport;
 
 namespace CWVR.Player;
 
@@ -12,17 +12,13 @@ public class VRSession : MonoBehaviour
     public static VRSession Instance { get; private set; }
 
     /// <summary>
-    /// Whether or not the game has VR enabled. This field will only be populated after CWVR has loaded.
+    /// Whether the game has VR enabled. This field will only be populated after CWVR has loaded.
     /// </summary>
     public static bool InVR => Plugin.Flags.HasFlag(Flags.VR);
-    
 
-    private InputSystem inputSystem;
-    
     public Camera MainCamera { get; private set; }
     
     public VRPlayer LocalPlayer { get; private set; }
-    public Controls Controls { get; private set; }
     public HUD HUD { get; private set; }
     
     public NetworkManager NetworkManager { get; private set; }
@@ -37,21 +33,25 @@ public class VRSession : MonoBehaviour
             InitializeVRSession();
         
         // Add VR settings to pause menu
-        var settingsObj = FindObjectOfType<EscapeMenuSettingsPage>(true).gameObject;
-        var settingsMenu = settingsObj.AddComponent<UI.Settings.SettingsMenu>();
-        var remapHandler = settingsObj.AddComponent<RemapHandler>();
-
-        settingsMenu.remapHandler = remapHandler;
+        // TODO: What to do with this?
+        // var settingsObj = FindObjectOfType<EscapeMenuSettingsPage>(true).gameObject;
+        // var settingsMenu = settingsObj.AddComponent<UI.Settings.SettingsMenu>();
+        //
+        // settingsMenu.remapHandler = remapHandler;
     }
 
     private void InitializeVRSession()
     {
+        // Disable base UI input system
+        var input = GameObject.Find("EventSystem")?.GetComponent<InputSystemUIInputModule>();
+        if (input != null)
+            input.enabled = false;
+        
         // Store Camera ref
         MainCamera = global::MainCamera.instance.cam;
         
-        // Setup Input System and Controls
-        inputSystem = new GameObject("VR Input System").AddComponent<InputSystem>();
-        Controls = new Controls(inputSystem);
+        // Setup VR inputs
+        InputHandler.Instance.m_playerInput.actions = AssetManager.InputActions;
         
         // Create local VR player
         LocalPlayer = global::Player.localPlayer.gameObject.AddComponent<VRPlayer>();
@@ -60,12 +60,13 @@ public class VRSession : MonoBehaviour
         HUD = gameObject.AddComponent<HUD>();
         
         // Load controller bindings
-        if (Plugin.Config.EnableCustomControls.Value)
-            ControlScheme.LoadSchema(Plugin.Config.CustomControls.Value);
-        else
-            ControlScheme.LoadProfile(InputSystem.DetectControllerProfile());
-        
-        Controls.ReloadBindings();
+        // TODO: Need to do this
+        // if (BepInPlugin.Config.EnableCustomControls.Value)
+        //     ControlScheme.LoadSchema(BepInPlugin.Config.CustomControls.Value);
+        // else
+        //     ControlScheme.LoadProfile(InputSystem.DetectControllerProfile());
+        //
+        // Controls.ReloadBindings();
     }
 
     private void OnDestroy()

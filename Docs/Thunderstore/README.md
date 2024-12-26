@@ -12,7 +12,7 @@
 
 ## WARNING
  
-**Due to the nature of Content Warning, this mod can cause motion sickness!**
+**Due to the nature of Content Warning, this mod may cause motion sickness!**
 
 ---
 
@@ -53,7 +53,7 @@ Look for the [`#cw-join`](https://discord.com/channels/747967102895390741/123671
 
 # Configuring the mod
 
-You can change the mod configuration from within the game itself. Just launch the game with the VR mod installed, get to the main menu, go to the settings and press "VR Settings". In here you can configure the VR mod to your liking.
+You can change the mod configuration from within the game itself. Just launch the game with the VR mod installed, get to the main menu, go to the settings and press "Mods". In here you can configure the VR mod to your liking.
 
 > _You can change the settings mid-game, you do not have to restart or rejoin._
 

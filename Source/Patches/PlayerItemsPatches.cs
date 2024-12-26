@@ -1,16 +1,17 @@
-using CWVR.Player;
+using System;
+using CWVR.Input;
 using HarmonyLib;
 using UnityEngine;
 
 namespace CWVR.Patches;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class PlayerItemsPatches
 {
     // TODO: Check if this can be determined dynamically
     private const int TOTAL_SLOTS = 4;
-
+    private static bool swappedLastInput;
+    
     /// <summary>
     /// Disable all colliders on held items so that the hand may still rotate freely when equipped
     /// </summary>
@@ -20,7 +21,7 @@ internal static class PlayerItemsPatches
     {
         var playerColliders = global::Player.localPlayer.GetComponentsInChildren<Collider>();
         var itemColliders = __instance.player.data.currentItem.gameObject.GetComponentsInChildren<Collider>();
-        
+
         playerColliders.Do(p => itemColliders.Do(i => Physics.IgnoreCollision(p, i)));
     }
 
@@ -35,25 +36,29 @@ internal static class PlayerItemsPatches
             __instance.player.HasLockedInput())
             return;
 
-        var controls = VRSession.Instance.Controls;
-
-
         switch (Plugin.Config.InteractToZoom.Value)
         {
-            case true when controls.Interact.Pressed():
-            case false when !controls.Interact.Pressed():
+            case true when Actions.Instance["Interact"].IsPressed():
+            case false when !Actions.Instance["Interact"].IsPressed():
                 return;
         }
-        
-        if (controls.ZoomIn.PressedDown())
-            __instance.player.data.selectedItemSlot = (__instance.player.data.selectedItemSlot + 1 + TOTAL_SLOTS) % TOTAL_SLOTS;
-        else if (controls.ZoomOut.PressedDown())
-            __instance.player.data.selectedItemSlot = (__instance.player.data.selectedItemSlot - 1 + TOTAL_SLOTS) % TOTAL_SLOTS;
+
+        var value = Actions.Instance["Zoom - Swap"].ReadValue<float>();
+        var should = MathF.Abs(value) > 0.75;
+
+        if (should && !swappedLastInput)
+        {
+            var change = value > 0 ? 1 : -1;
+
+            __instance.player.data.selectedItemSlot =
+                (__instance.player.data.selectedItemSlot + change + TOTAL_SLOTS) % TOTAL_SLOTS;
+        }
+
+        swappedLastInput = should;
     }
 }
 
 [CWVRPatch(CWVRPatchTarget.Universal)]
-[HarmonyPatch]
 internal static class UniversalPlayerItemsPatches
 {
     /// <summary>
