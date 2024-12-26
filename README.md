@@ -46,7 +46,17 @@ And from the `<Project Name>_Data/Plugins/x86_64` directory:
 
 ## Installing without BepInEx
 
-TODO
+CW // VR supports Content Warning's built in mod loader.
+
+To get started, head over to your game's directory. You can do that quickly by going to Steam -> Content Warning -> right click -> Manage -> Browse local files. Inside this folder, create a new folder called `Plugins` (unless it already exists).
+
+Inside this `Plugins` folder, create a new folder called `CWVR`. Inside this folder, please the `CWVR.dll` and the `CWVR.Preload.dll` files that were generated during the [COMPILING.md](COMPILING.md) steps. Then make sure to rename `CWVR.Preload.dll` to `CWVR.preload.dll` (notice the lowercase P, very important!). Windows might prevent you from renaming a file where only the case has changed, so you may first rename it to any filename, and then you can rename it to `CWVR.preload.dll`.
+
+After this has been completed, create a new directory called `RuntimeDeps` (has to be named exactly that) inside the `CWVR` folder. Here you will need to put the DLL files that you have retrieved during the [Retrieving Runtime Dependencies](#retrieving-runtime-dependencies-from-a-unity-project) step.
+
+Finally, grab the [**Asset Bundle**](https://github.com/DaXcess/CWVR/raw/refs/heads/thunderstore/contentwarningvr) from one of the releases, and place them into the same folder as the `CWVR.dll` and `CWVR.preload.dll` files. This asset bundle file needs to be called `contentwarningvr`.
+
+You can now run the game with CWVR installed.
 
 ## Installing with BepInEx
 
@@ -58,4 +68,23 @@ Once BepInEx has been installed and run at least once, you can start installing 
 
 First of all, in the `BepInEx/plugins` folder, create a new folder called `CWVR` (doesn't have to be named that specifically, but makes identification easier). Inside this folder, place the `CWVR.dll` file that was generated during the [COMPILING.md](COMPILING.md) steps.
 
-After this has been completed, create a new directory called `RuntimeDeps` (has to be named exactly that) inside the `CWVR` folder. Here you will need to put the DLLs that you have retrieved during the [Retrieving Runtime Dependencies](#retrieving-runtime-dependencies-from-a-unity-project) step. You can now run the game with CWVR installed.
+After this has been completed, create a new directory called `RuntimeDeps` (has to be named exactly that) inside the `CWVR` folder. Inside this folder you will need to put the following DLL files:
+
+- UnityEngine.SpatialTracking.dll
+- UnityEngine.XR.CoreUtils.dll
+- Unity.XR.Interaction.Toolkit.dll
+- Unity.XR.Management.dll
+- Unity.XR.OpenXR.dll
+
+These files should have been retrieved during the [Retrieving Runtime Dependencies](#retrieving-runtime-dependencies-from-a-unity-project) step, or from grabbing them from the latest release.
+
+Next up, grab the [**Asset Bundle**](https://github.com/DaXcess/CWVR/raw/refs/heads/thunderstore/contentwarningvr) from one of the releases, and place them into the same folder as the `CWVR.dll` file. This asset bundle file needs to be called `contentwarningvr`.
+
+Finally, in the `BepInEx/patchers` folder, also create a new folder called `CWVR` (again, doesn't have to be exact). Inside this folder, place the `CWVR.Preload.dll` file that was also generated during the [COMPILING.md](COMPILING.md) steps.
+
+In this folder, also create a new directory called `RuntimeDeps` (again, has to be exactly named that), and place the following DLL files inside:
+
+- openxr_loader.dll
+- UnityOpenXR.dll
+
+You can now run the game with CWVR installed.
