@@ -13,7 +13,6 @@
     <RepositoryUrl>https://github.com/DaXcess/CWVR</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageLicenseUrl>https://github.com/DaXcess/CWVR/blob/main/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
