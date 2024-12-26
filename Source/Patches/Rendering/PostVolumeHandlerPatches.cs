@@ -1,5 +1,4 @@
 using System.Collections;
-using CWVR.Player;
 using HarmonyLib;
 using HorizonBasedAmbientOcclusion.Universal;
 using UnityEngine;
@@ -7,7 +6,6 @@ using UnityEngine;
 namespace CWVR.Patches.Rendering;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class PostVolumeHandlerPatches
 {
     /// <summary>

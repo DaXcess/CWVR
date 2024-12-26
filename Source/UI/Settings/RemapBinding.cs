@@ -1,90 +1,74 @@
-using System.Globalization;
+using CWVR.Assets;
 using CWVR.Input;
-using CWVR.Player;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using Zorro.ControllerSupport;
+
+#pragma warning disable CS0649
 
 namespace CWVR.UI.Settings;
 
 public class RemapBinding : MonoBehaviour
 {
-    [SerializeField] internal TextMeshProUGUI settingTitle = null;
-    [SerializeField] internal string settingName;
- 
-    private Button button;
-    private TextMeshProUGUI buttonText;
-    private TMP_InputField deadzoneInput;
-    private Slider deadzoneSlider;
+    [SerializeField] internal TextMeshProUGUI settingTitle;
+    [SerializeField] internal Button settingButton;
+    [SerializeField] internal TextMeshProUGUI settingButtonText;
+    [SerializeField] internal Image settingButtonImage;
 
-    private Binding binding;
-    
-    public bool isAxisOnly;
+    private RemappableControl control;
+    private PlayerInput playerInput;
+    private int bindingIndex;
 
-    internal RemapHandler remapHandler;
+    internal int RebindIndex => bindingIndex;
+    internal InputActionReference ActionReference => control.currentInput;
     
     private void Awake()
     {
-        button = GetComponentInChildren<Button>();
-        buttonText = button.GetComponentInChildren<TextMeshProUGUI>();
-        deadzoneInput = GetComponentInChildren<TMP_InputField>();
-        deadzoneSlider = GetComponentInChildren<Slider>();
-        
-        button.onClick.AddListener(() =>
-        {
-            buttonText.text = "[...]";
-            
-            if (isAxisOnly)
-            {
-                remapHandler.DetectAxis2DControl(binding =>
-                {
-                    binding.deadzone = this.binding.deadzone;
-                    
-                    SetBinding(binding);
-                    SaveBinding();
-                });
-            }
-            else
-            {
-                remapHandler.DetectBooleanControl(binding =>
-                {
-                    binding.deadzone = this.binding.deadzone;
-
-                    SetBinding(binding);
-                    SaveBinding();
-                });
-            }
-        });
+        playerInput = InputHandler.Instance.m_playerInput;
     }
 
-    public void SetBinding(Binding binding)
+    internal void Setup(RemappableControl remappableControl, SFX_Instance hoverSound, SFX_Instance clickSound)
     {
-        this.binding = binding;
+        control = remappableControl;
+
+        var sfx = GetComponentInChildren<UI_Sound>();
+        sfx.hoverSound = hoverSound;
+        sfx.clickSound = clickSound;
+
+        Reload();
         
-        buttonText.text =
-            $"{binding.controller} {(binding.button.HasValue ? Utils.PascalToLongString(binding.button.ToString()) : Utils.PascalToLongString(binding.axis.ToString()))}";
-        
-        deadzoneInput.text = binding.deadzone.ToString(CultureInfo.InvariantCulture);
-        deadzoneSlider.value = binding.deadzone;
+        settingButton.onClick.AddListener(OnClickRebind);
+    }
+    
+    public void Reload()
+    {
+        bindingIndex = Mathf.Max(control.bindingIndex, 0) +
+                           Mathf.Max(control.currentInput.action.GetBindingIndex(playerInput.currentControlScheme), 0);
+
+        settingTitle.text = control.controlName;
+        settingButtonImage.sprite = string.IsNullOrEmpty(playerInput.currentControlScheme)
+            ? null
+            : AssetManager.RemappableControls.icons[control.currentInput.action.bindings[bindingIndex].effectivePath];
+
+        // Only show image if it actually has a sprite (otherwise it'll be a white rectangle)
+        settingButtonImage.enabled = settingButtonImage.sprite != null;
     }
 
-    public void UpdateDeadzone(float deadzone)
+    public void OnFinishRebind()
     {
-        var binding = this.binding;
-        binding.deadzone = Mathf.Clamp(deadzone, 0, 1);
+        settingButtonText.enabled = false;
 
-        SetBinding(binding);
-        SaveBinding();
+        Reload();
     }
-
-    private void SaveBinding()
+    
+    private void OnClickRebind()
     {
-        ControlScheme.UpdateBinding(settingName, binding);
+        if (!RemapManager.Instance.StartRebind(this))
+            return;
 
-        Plugin.Config.CustomControls.Value = ControlScheme.ToJson();
-        
-        // Reload controls if we're in game
-        if (VRSession.Instance is { } instance)
-            instance.Controls.ReloadBindings();
+        settingButtonImage.enabled = false;
+        settingButtonText.enabled = true;
     }
 }

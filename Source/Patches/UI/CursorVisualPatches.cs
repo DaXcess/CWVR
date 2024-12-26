@@ -8,7 +8,6 @@ using static HarmonyLib.AccessTools;
 namespace CWVR.Patches.UI;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class CursorVisualPatches
 {
     /// <summary>

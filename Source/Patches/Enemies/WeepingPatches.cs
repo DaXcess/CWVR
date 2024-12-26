@@ -13,7 +13,6 @@ using Object = UnityEngine.Object;
 namespace CWVR.Patches.Enemies;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class WeepingPatches
 {
     private static NonNativeKeyboard keyboard;

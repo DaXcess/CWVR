@@ -53,9 +53,14 @@ jobs:
           mkdir package
           git --work-tree=./package checkout origin/thunderstore ./
 
-          # Copy and sign release binary
+          # Copy and sign release binaries
           cp bin/Release/netstandard2.1/CWVR.dll ./package/BepInEx/plugins/CWVR/
+          cp bin/Release/netstandard2.1/CWVR.Preload.dll ./package/BepInEx/patchers/CWVR/
           gpg --output ./package/BepInEx/plugins/CWVR/CWVR.dll.sig --detach-sig ./package/BepInEx/plugins/CWVR/CWVR.dll
+          gpg --output ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll.sig --detach-sig ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll
+
+          # Move assets
+          mv ./package/contentwarningvr ./package/BepInEx/plugins/CWVR/contentwarningvr
 
           # Copy docs and license
           cp CHANGELOG.md ./package/CHANGELOG.md
@@ -65,10 +70,27 @@ jobs:
           # Update Thunderstore manifest
           jq '.version_number = "${{ steps.vars.outputs.version }}"' ./package/manifest.json > ./package/manifest_new.json
           mv ./package/manifest_new.json ./package/manifest.json
+          
+          # Create Workshop package
+          mkdir ./package-workshop
+          cp -r ./package/BepInEx/plugins/CWVR/* ./package-workshop/
+          cp ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll ./package-workshop/CWVR.preload.dll
+          cp ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll.sig ./package-workshop/CWVR.preload.dll.sig
+          cp -r ./package/BepInEx/patchers/CWVR/RuntimeDeps ./package-workshop
+          cp ./package/icon.png ./package-workshop/preview.png
+          cp ./package/README.md ./package-workshop/
+          cp ./package/LICENSE ./package-workshop/
 
       - name: Upload build artifacts
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: CWVR-${{ steps.vars.outputs.version }}
+          name: CWVR-${{ steps.vars.outputs.version }}-BepInEx
           path: ./package
+
+      - name: Upload Steam Workshop build
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: CWVR-${{ steps.vars.outputs.version }}-Workshop
+          path: ./package-workshop

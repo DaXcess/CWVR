@@ -6,7 +6,6 @@ using HarmonyLib;
 namespace CWVR.Patches;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class PlayerInteractionPatches
 {
     /// <summary>

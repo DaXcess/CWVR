@@ -1,3 +1,15 @@
+# 1.1.0
+
+- Added support for v1.19.e
+- Added Steam Workshop support
+- Added Occlusion Mesh as an optional optimization
+- Added a Resolution Scale setting (also works on flatscreen)
+- Added an Upscaling Filter setting (also works on flatscreen)
+- Reworked input system
+- Reworked settings system
+- Reworked rebinding UI
+- Removed the restart requirements when first using the VR mod
+
 # 1.0.3
 
 - Added a temporary patch to prevent Content Warning from breaking soft dependencies

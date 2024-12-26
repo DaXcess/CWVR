@@ -170,7 +170,6 @@ public class Customizer : MonoBehaviour
 }
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class PlayerCustomizerPatches
 {
     [HarmonyPatch(typeof(PlayerCustomizer), nameof(PlayerCustomizer.RPCA_EnterTerminal))]

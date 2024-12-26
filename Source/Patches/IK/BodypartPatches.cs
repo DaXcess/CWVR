@@ -4,7 +4,6 @@ using HarmonyLib;
 namespace CWVR.Patches.IK;
 
 [CWVRPatch(CWVRPatchTarget.Universal)]
-[HarmonyPatch]
 internal static class BodypartPatches
 {
     // TODO: I really want a better solution for this

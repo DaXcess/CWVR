@@ -1,25 +1,12 @@
-using System;
-using System.IO;
-using System.Runtime.Serialization.Json;
-using System.Security.Cryptography;
 using System.Text;
-using CWVR.Input;
 using CWVR.Player;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
-using UnityEngine.XR;
 
 namespace CWVR;
 
 internal static class Utils
 {
-    public static byte[] ComputeHash(byte[] input)
-    {
-        using var sha = SHA256.Create();
-
-        return sha.ComputeHash(input);
-    }
-
     public static Pose GetPoseData(this TrackedPoseDriver driver)
     {
         driver.GetPoseData(driver.m_Device, driver.m_PoseSource, out var pose);
@@ -79,26 +66,5 @@ internal static class Utils
             return VRSession.InVR;
 
         return VRSession.Instance && VRSession.Instance.NetworkManager.InVR(player);
-    }
-    
-    public static InputDevice GetDevice(this InputSystem.XRController controller)
-    {
-        return controller switch
-        {
-            InputSystem.XRController.Left => InputDevices.GetDeviceAtXRNode(XRNode.LeftHand),
-            InputSystem.XRController.Right => InputDevices.GetDeviceAtXRNode(XRNode.RightHand),
-            _ => throw new ArgumentOutOfRangeException(nameof(controller), controller, null)
-        };
-    }
-}
-
-internal static class JSON
-{
-    public static T Deserialize<T>(string json)
-    {
-        using var mem = new MemoryStream(Encoding.UTF8.GetBytes(json));
-        var serializer = new DataContractJsonSerializer(typeof(T));
-
-        return (T)serializer.ReadObject(mem);
     }
 }

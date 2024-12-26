@@ -1,10 +1,10 @@
+using CWVR.Input;
 using CWVR.Player;
 using HarmonyLib;
 
 namespace CWVR.Patches.UI;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class EscapeMenuPatches
 {
     /// <summary>
@@ -14,7 +14,7 @@ internal static class EscapeMenuPatches
     [HarmonyPrefix]
     private static bool OnLateUpdate(EscapeMenu __instance)
     {
-        if (!VRSession.Instance.Controls.Menu.PressedDown())
+        if (!Actions.Instance["OpenMenu"].WasPressedThisFrame())
             return false;
 
         __instance.Toggle();

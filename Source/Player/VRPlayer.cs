@@ -1,3 +1,6 @@
+using System;
+using CWVR.Input;
+using CWVR.MultiLoader.Common;
 using UnityEngine;
 
 namespace CWVR.Player;
@@ -14,6 +17,11 @@ public class VRPlayer : MonoBehaviour
     private Vector3 Position => player.refs.cameraPos.position;
     
     private Vector2 prevPlayerPosition;
+
+    /// <summary>
+    /// Used to keep track of turning when using snap turn
+    /// </summary>
+    private bool turnedLastInput;
 
     private void Awake()
     {
@@ -84,26 +92,32 @@ public class VRPlayer : MonoBehaviour
         // Don't allow rotating while in ragdoll, but do allow when spectating
         if (player.Ragdoll() && !Spectate.spectating)
             return;
-        
-        var controls = VRSession.Instance.Controls;
+
+        if (!GlobalInputHandler.CanTakeInput())
+            return;
         
         switch (Plugin.Config.TurnProvider.Value)
         {
-            case Config.TurnProviderOption.Snap:
-                if (controls.TurnLeft.PressedDown())
-                    Rig.AddRotation(-Plugin.Config.SnapTurnSize.Value);
-                else if (controls.TurnRight.PressedDown())
-                    Rig.AddRotation(Plugin.Config.SnapTurnSize.Value);
+            case IConfig.TurnProviderOption.Snap:
+                var value = Actions.Instance["Turn"].ReadValue<float>();
+                var should = MathF.Abs(value) > 0.75;
+
+                if (!turnedLastInput && should)
+                    if (value > 0)
+                        Rig.AddRotation(Plugin.Config.SnapTurnSize.Value);
+                    else
+                        Rig.AddRotation(-Plugin.Config.SnapTurnSize.Value);
+
+                turnedLastInput = should;
+
                 break;
-            
-            case Config.TurnProviderOption.Smooth:
-                if (controls.TurnLeft.Pressed())
-                    Rig.AddRotation(-180 * Time.deltaTime * Plugin.Config.SmoothTurnSpeedModifier.Value);
-                else if (controls.TurnRight.Pressed())
-                    Rig.AddRotation(180 * Time.deltaTime * Plugin.Config.SmoothTurnSpeedModifier.Value);
+
+            case IConfig.TurnProviderOption.Smooth:
+                Rig.AddRotation(180 * Time.deltaTime * Plugin.Config.SmoothTurnSpeedModifier.Value *
+                                Actions.Instance["Turn"].ReadValue<float>());
                 break;
-            
-            case Config.TurnProviderOption.Disabled:
+
+            case IConfig.TurnProviderOption.Disabled:
             default:
                 break;
         }

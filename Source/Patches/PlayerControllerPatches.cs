@@ -4,7 +4,6 @@ using HarmonyLib;
 namespace CWVR.Patches;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class PlayerControllerPatches
 {
     [HarmonyPatch(typeof(PlayerController), nameof(PlayerController.SetRotations))]

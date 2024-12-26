@@ -6,7 +6,6 @@ using static HarmonyLib.AccessTools;
 namespace CWVR.Patches.Items;
 
 [CWVRPatch]
-[HarmonyPatch]
 internal static class DefibPatches
 {
     [HarmonyPatch(typeof(Defib), nameof(Defib.Update))]

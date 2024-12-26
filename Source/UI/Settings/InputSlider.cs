@@ -15,12 +15,14 @@ public class InputSlider : MonoBehaviour
         inputField = GetComponentInChildren<TMP_InputField>();
         slider = GetComponentInChildren<Slider>();
 
+        inputField.onDeselect.AddListener(OnInputFieldChanged);
         inputField.onSubmit.AddListener(OnInputFieldChanged);
         slider.onValueChanged.AddListener(OnSliderValueChanged);
     }
 
     private void OnDestroy()
     {
+        inputField.onDeselect.RemoveListener(OnInputFieldChanged);
         inputField.onSubmit.RemoveListener(OnInputFieldChanged);
         slider.onValueChanged.RemoveListener(OnSliderValueChanged);
     }
@@ -29,7 +31,7 @@ public class InputSlider : MonoBehaviour
     {
         if (!float.TryParse(value, out var floatValue))
             return;
-        
+
         if (slider.wholeNumbers)
         {
             if (!int.TryParse(value, out var intValue))
