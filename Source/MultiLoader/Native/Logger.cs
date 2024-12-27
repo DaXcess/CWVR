@@ -1,7 +1,7 @@
 using UnityEngine;
 using ILogger = CWVR.MultiLoader.Common.ILogger;
 
-namespace CWVR.MultiLoader.Workshop;
+namespace CWVR.MultiLoader.Native;
 
 public class Logger : ILogger
 {

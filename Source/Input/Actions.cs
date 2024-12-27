@@ -38,24 +38,27 @@ public class Actions
     }
 
     public InputAction this[string name] => InputHandler.Instance.m_playerInput.actions[name];
+}
 
-    private Dictionary<string, bool> floatCache = [];
+public static class InputActionExtensions
+{
+    private static Dictionary<InputAction, bool> floatCache = [];
 
-    public float GetFloatThisFrame(string name, float deadzone = 0.75f)
+    public static float ReadFloatThisFrame(this InputAction action, float deadzone = 0.75f)
     {
-        var value = this[name].ReadValue<float>();
+        var value = action.ReadValue<float>();
         var should = MathF.Abs(value) >= deadzone;
 
         try
         {
-            if (should && !floatCache.GetValueOrDefault(name, false))
+            if (should && !floatCache.GetValueOrDefault(action, false))
                 return value < 0 ? -1 : 1;
             
             return 0f;
         }
         finally
         {
-            floatCache[name] = should;
+            floatCache[action] = should;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace CWVR.Patches;
 /// Force setting the .Value of a setting to immediately persist these changes.
 /// This fixes issues where non-exposed settings must be saved manually every time.
 /// </summary>
-[CWVRPatch(CWVRPatchTarget.Universal, LoaderTarget.Workshop)]
+[CWVRPatch(CWVRPatchTarget.Universal, LoaderTarget.Native)]
 internal static class ForceApplySettingsPatches
 {
     [HarmonyPatch(typeof(BoolSetting), nameof(BoolSetting.Value), MethodType.Setter)]

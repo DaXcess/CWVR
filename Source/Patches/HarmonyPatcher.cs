@@ -34,7 +34,7 @@ internal static class HarmonyPatcher
 
                 if (attribute.Loader == LoaderTarget.Both ||
                     (attribute.Loader == LoaderTarget.BepInEx && Plugin.Loader == Loader.BepInEx) ||
-                    (attribute.Loader == LoaderTarget.Workshop && Plugin.Loader == Loader.Workshop))
+                    (attribute.Loader == LoaderTarget.Native && Plugin.Loader == Loader.Native))
                     patcher.CreateClassProcessor(type, true).Patch();
             }
             catch (Exception e)
@@ -62,6 +62,6 @@ internal enum CWVRPatchTarget
 internal enum LoaderTarget
 {
     BepInEx,
-    Workshop,
+    Native,
     Both
 }

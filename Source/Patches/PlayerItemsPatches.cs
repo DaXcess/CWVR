@@ -10,7 +10,6 @@ internal static class PlayerItemsPatches
 {
     // TODO: Check if this can be determined dynamically
     private const int TOTAL_SLOTS = 4;
-    private static bool swappedLastInput;
     
     /// <summary>
     /// Disable all colliders on held items so that the hand may still rotate freely when equipped
@@ -43,18 +42,18 @@ internal static class PlayerItemsPatches
                 return;
         }
 
-        var value = Actions.Instance["Zoom - Swap"].ReadValue<float>();
-        var should = MathF.Abs(value) > 0.75;
-
-        if (should && !swappedLastInput)
+        switch (Actions.Instance["Zoom - Swap"].ReadFloatThisFrame())
         {
-            var change = value > 0 ? 1 : -1;
+            case < 0:
+                __instance.player.data.selectedItemSlot =
+                    (__instance.player.data.selectedItemSlot + 0 + TOTAL_SLOTS) % TOTAL_SLOTS;
+                break;
 
-            __instance.player.data.selectedItemSlot =
-                (__instance.player.data.selectedItemSlot + change + TOTAL_SLOTS) % TOTAL_SLOTS;
+            case > 0:
+                __instance.player.data.selectedItemSlot =
+                    (__instance.player.data.selectedItemSlot + 1 + TOTAL_SLOTS) % TOTAL_SLOTS;
+                break;
         }
-
-        swappedLastInput = should;
     }
 }
 

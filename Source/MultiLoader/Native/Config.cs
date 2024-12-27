@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using Zorro.Settings;
 
-namespace CWVR.MultiLoader.Workshop;
+namespace CWVR.MultiLoader.Native;
 
 public class Config : IConfig
 {

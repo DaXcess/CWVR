@@ -131,5 +131,5 @@ public enum Flags
 public enum Loader
 {
     BepInEx,
-    Workshop
+    Native
 }

@@ -2,19 +2,18 @@ using System;
 using CWVR.UI;
 using HarmonyLib;
 using JetBrains.Annotations;
-using UnityEngine.Rendering.Universal;
 using Debug = UnityEngine.Debug;
 using Object = UnityEngine.Object;
 
-namespace CWVR.MultiLoader.Workshop;
+namespace CWVR.MultiLoader.Native;
 
 [ContentWarningPlugin(Plugin.PLUGIN_GUID, Plugin.PLUGIN_VERSION, true)]
 [UsedImplicitly]
-public class WorkshopMod
+public class NativeMod
 {
     private static readonly Harmony early = new("io.daxcess.cwvr-early");
 
-    static WorkshopMod()
+    static NativeMod()
     {
         if (CheckBepInExDuplicate())
         {
@@ -29,7 +28,7 @@ public class WorkshopMod
 
         Plugin.Logger = new Logger();
         Plugin.Config = new Config();
-        Plugin.Loader = Loader.Workshop;
+        Plugin.Loader = Loader.Native;
 
         Plugin.SetupEarlyDependencies();
         

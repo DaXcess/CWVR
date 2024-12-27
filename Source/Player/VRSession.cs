@@ -31,13 +31,6 @@ public class VRSession : MonoBehaviour
         
         if (InVR)
             InitializeVRSession();
-        
-        // Add VR settings to pause menu
-        // TODO: What to do with this?
-        // var settingsObj = FindObjectOfType<EscapeMenuSettingsPage>(true).gameObject;
-        // var settingsMenu = settingsObj.AddComponent<UI.Settings.SettingsMenu>();
-        //
-        // settingsMenu.remapHandler = remapHandler;
     }
 
     private void InitializeVRSession()
@@ -58,15 +51,6 @@ public class VRSession : MonoBehaviour
         
         // Create HUD
         HUD = gameObject.AddComponent<HUD>();
-        
-        // Load controller bindings
-        // TODO: Need to do this
-        // if (BepInPlugin.Config.EnableCustomControls.Value)
-        //     ControlScheme.LoadSchema(BepInPlugin.Config.CustomControls.Value);
-        // else
-        //     ControlScheme.LoadProfile(InputSystem.DetectControllerProfile());
-        //
-        // Controls.ReloadBindings();
     }
 
     private void OnDestroy()

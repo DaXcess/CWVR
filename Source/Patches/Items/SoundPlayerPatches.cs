@@ -25,7 +25,7 @@ internal static class SoundPlayerPatches
         if (Plugin.Config.InteractToZoom.Value && !Actions.Instance["Interact"].IsPressed())
             return;
 
-        switch (Actions.Instance.GetFloatThisFrame("Zoom - Swap"))
+        switch (Actions.Instance["Zoom - Swap"].ReadFloatThisFrame())
         {
             case > 0:
                 __instance.selectionEntry.selectedValue--;

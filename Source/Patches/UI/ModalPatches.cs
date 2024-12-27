@@ -61,7 +61,7 @@ internal static class ModalPatches
             return;
         }
 
-        switch (Actions.Instance.GetFloatThisFrame("ModalNavigate"))
+        switch (Actions.Instance["ModalNavigate"].ReadFloatThisFrame())
         {
             case < 0:
                 buttons[buttonIndex].OnDeselect();
