@@ -11,6 +11,8 @@ using Zorro.Settings;
 
 namespace CWVR.MultiLoader.Native;
 
+#if NATIVE
+
 public class Config : IConfig
 {
     
@@ -371,3 +373,5 @@ public class ControllerBindingsOverrideSetting : StringSetting, IConfigEntry<str
 
     public override string GetDefaultValue() => "";
 }
+
+#endif

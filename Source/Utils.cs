@@ -1,4 +1,6 @@
+using System;
 using System.Text;
+using CWVR.Patches;
 using CWVR.Player;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
@@ -17,11 +19,11 @@ internal static class Utils
     public static void SetLayerRecursive(this GameObject go, int layer)
     {
         go.layer = layer;
-        
+
         foreach (Transform child in go.transform)
         {
             child.gameObject.layer = layer;
-            
+
             if (child.GetComponentInChildren<Transform>() is not null)
                 child.gameObject.SetLayerRecursive(layer);
         }
@@ -66,5 +68,15 @@ internal static class Utils
             return VRSession.InVR;
 
         return VRSession.Instance && VRSession.Instance.NetworkManager.InVR(player);
+    }
+
+    public static void Enqueue(Action action)
+    {
+        GameHandlerPatches.EnqueueAction(action);
+    }
+
+    public static void EnqueueModal(string title, string body, ModalOption[] options = null, Action onClosed = null)
+    {
+        Enqueue(() => Modal.Show(title, body, options ?? [new ModalOption("Ok")], onClosed));
     }
 }

@@ -1,3 +1,9 @@
+# 1.1.1
+
+- Added a popup in game when VR fails to load, allowing easier access to logs
+- Fixed an issue where Content Loader would load this mod from the workshop incorrectly
+- Fixed an issue where some settings wouldn't be applied when using BepInEx
+
 # 1.1.0
 
 - Added support for v1.19.e

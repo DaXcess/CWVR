@@ -1,5 +1,4 @@
 using HarmonyLib;
-using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.InputSystem.XR;
 

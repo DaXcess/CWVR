@@ -32,8 +32,14 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore
 
-      - name: Build CWVR
-        run: dotnet build
+      - name: Build CWVR Preloader
+        run: dotnet build Preload/CWVR.Preload.csproj /p:OutputPath=../bin/
+
+      - name: Build CWVR BepInEx variant
+        run: dotnet build CWVR.csproj /p:DefineConstants=BEPINEX /p:OutputPath=bin/BepInEx
+
+      - name: Build CWVR Native variant
+        run: dotnet build CWVR.csproj /p:DefineConstants=NATIVE /p:OutputPath=bin/Native
 
       - name: Configure GPG Key
         run: |
@@ -48,13 +54,13 @@ jobs:
           git --work-tree=./package checkout origin/thunderstore ./
 
           # Copy and sign debug binaries
-          cp bin/Debug/netstandard2.1/CWVR.dll ./package/BepInEx/plugins/CWVR/
-          cp bin/Debug/netstandard2.1/CWVR.Preload.dll ./package/BepInEx/patchers/CWVR/
+          cp bin/BepInEx/CWVR.dll ./package/BepInEx/plugins/CWVR/
+          cp bin/CWVR.Preload.dll ./package/BepInEx/patchers/CWVR/
           gpg --output ./package/BepInEx/plugins/CWVR/CWVR.dll.sig --detach-sig ./package/BepInEx/plugins/CWVR/CWVR.dll
           gpg --output ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll.sig --detach-sig ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll
 
-          # Move assets
-          mv ./package/contentwarningvr ./package/BepInEx/plugins/CWVR/contentwarningvr
+          # Copy assets
+          cp ./package/contentwarningvr ./package/BepInEx/plugins/CWVR/contentwarningvr
 
           # Copy docs and license
           cp CHANGELOG.md ./package/CHANGELOG.md
@@ -65,15 +71,22 @@ jobs:
           jq '.version_number = "${{ steps.vars.outputs.version }}"' ./package/manifest.json > ./package/manifest_new.json
           mv ./package/manifest_new.json ./package/manifest.json
           
-          # Create Workshop package
-          mkdir ./package-workshop
-          cp -r ./package/BepInEx/plugins/CWVR/* ./package-workshop/
-          cp ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll ./package-workshop/CWVR.preload.dll
-          cp ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll.sig ./package-workshop/CWVR.preload.dll.sig
-          cp -r ./package/BepInEx/patchers/CWVR/RuntimeDeps ./package-workshop
-          cp ./package/icon.png ./package-workshop/preview.png
-          cp ./package/README.md ./package-workshop/
-          cp ./package/LICENSE ./package-workshop/
+          # Create Native package
+          mkdir ./package-native
+          
+          cp bin/Native/CWVR.dll ./package-native/
+          cp -r ./package/BepInEx/plugins/CWVR/RuntimeDeps ./package-native/
+          gpg --output ./package-native/CWVR.dll.sig --detach-sig ./package-native/CWVR.dll
+          
+          # Move assets
+          mv ./package/contentwarningvr ./package-native/
+          
+          cp ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll ./package-native/CWVR.preload.dll
+          cp ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll.sig ./package-native/CWVR.preload.dll.sig
+          cp -r ./package/BepInEx/patchers/CWVR/RuntimeDeps ./package-native
+          cp ./package/icon.png ./package-native/preview.png
+          cp ./package/README.md ./package-native/
+          cp ./package/LICENSE ./package-native/
 
       - name: Upload BepInEx build
         if: github.event_name == 'push'
@@ -82,9 +95,9 @@ jobs:
           name: CWVR-${{ steps.vars.outputs.version }}-BepInEx-dev-${{ steps.vars.outputs.sha_short }}
           path: ./package
 
-      - name: Upload Steam Workshop build
+      - name: Upload Native build
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: CWVR-${{ steps.vars.outputs.version }}-Workshop-dev-${{ steps.vars.outputs.sha_short }}
-          path: ./package-workshop
+          name: CWVR-${{ steps.vars.outputs.version }}-Native-dev-${{ steps.vars.outputs.sha_short }}
+          path: ./package-native

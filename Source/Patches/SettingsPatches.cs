@@ -1,5 +1,4 @@
 using System.Reflection;
-using CWVR.UI.Settings;
 using HarmonyLib;
 using Zorro.Settings;
 
@@ -47,12 +46,10 @@ internal static class BepInExSettingsPatches
     /// <summary>
     /// Remove all the <see cref="ContentWarningSetting" /> settings from this assembly from the game, as we're using BepInEx
     /// </summary>
-    [HarmonyPatch(typeof(SettingsHandler), MethodType.Constructor)]
-    [HarmonyPostfix]
-    private static void RemoveAssemblySettings(SettingsHandler __instance)
+    [HarmonyPatch(typeof(SettingsHandler), nameof(SettingsHandler.AddSetting))]
+    [HarmonyPrefix]
+    private static bool RemoveAssemblySettings(Setting setting)
     {
-        var me = Assembly.GetExecutingAssembly();
-        
-        __instance.settings.RemoveAll(setting => setting.GetType().Assembly == me);
+        return setting.GetType().Assembly != Assembly.GetExecutingAssembly();
     }
 }

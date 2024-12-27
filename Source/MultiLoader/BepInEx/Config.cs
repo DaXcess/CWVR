@@ -1,6 +1,7 @@
 using System;
 using BepInEx.Configuration;
 using CWVR.MultiLoader.Common;
+using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
 namespace CWVR.MultiLoader.BepInEx;
@@ -8,7 +9,7 @@ namespace CWVR.MultiLoader.BepInEx;
 public class Config(ConfigFile file) : IConfig
 {
     public ConfigFile File { get; } = file;
-    
+
     // General configuration
 
     public IConfigEntry<bool> DisableVR { get; } = new WrappedConfigEntry<bool>(file.Bind("General", "DisableVR", false,
@@ -80,6 +81,18 @@ public class Config(ConfigFile file) : IConfig
 
     public IConfigEntry<string> ControllerBindingsOverride { get; } = new WrappedConfigEntry<string>(
         file.Bind("Internal", "CustomControls", "", "The custom control schema to use"));
+    
+    // Event Handlers
+
+    public void ApplySettings()
+    {
+        var asset = QualitySettings.renderPipeline as UniversalRenderPipelineAsset;
+        if (asset == null) // It would be very weird if this is true
+            return;
+
+        asset.renderScale = RenderScale.Value;
+        asset.upscalingFilter = UpscalingFilter.Value;
+    }
 }
 
 public class WrappedConfigEntry<T>(ConfigEntry<T> entry) : IConfigEntry<T>

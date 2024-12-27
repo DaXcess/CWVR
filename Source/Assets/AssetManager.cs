@@ -53,6 +53,13 @@ internal static class AssetManager
             assetBundle.LoadAsset<GameObject>("Remappable Controls").GetComponent<RemappableControls>();
         
         WhiteMat = assetBundle.LoadAsset<Material>("White");
+
+        if (RemappableControls == null || RemappableControls.controls == null)
+        {
+            Logger.LogError(
+                "Unity failed to deserialize some assets. Are you missing the FixPluginTypesSerialization mod?");
+            return false;
+        }
         
         return true;
     }

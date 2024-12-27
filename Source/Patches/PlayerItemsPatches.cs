@@ -1,4 +1,3 @@
-using System;
 using CWVR.Input;
 using HarmonyLib;
 using UnityEngine;

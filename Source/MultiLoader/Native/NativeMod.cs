@@ -7,6 +7,8 @@ using Object = UnityEngine.Object;
 
 namespace CWVR.MultiLoader.Native;
 
+#if NATIVE
+
 [ContentWarningPlugin(Plugin.PLUGIN_GUID, Plugin.PLUGIN_VERSION, true)]
 [UsedImplicitly]
 public class NativeMod
@@ -68,3 +70,5 @@ public class NativeMod
         return global::BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey(Plugin.PLUGIN_GUID);
     }
 }
+
+#endif

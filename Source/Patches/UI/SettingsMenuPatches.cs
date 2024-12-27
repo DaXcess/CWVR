@@ -59,6 +59,9 @@ internal static class UniversalSettingsMenuPatches
     [HarmonyPrefix]
     private static void BeforeShow()
     {
+        if (VRSettingsMenu.Instance == null)
+            return;
+        
         VRSettingsMenu.Instance.DestroySettings();
     }
 
@@ -69,6 +72,9 @@ internal static class UniversalSettingsMenuPatches
     [HarmonyPostfix]
     private static void OnSettingsMenuShown(SettingsMenu __instance, SettingCategory category)
     {
+        if (VRSettingsMenu.Instance == null)
+            return;
+        
         if (category != SettingCategory.Mods) 
             return;
         
