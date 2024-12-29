@@ -9,8 +9,6 @@ using CWVR.MultiLoader.Common;
 using CWVR.Patches;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 using ILogger = CWVR.MultiLoader.Common.ILogger;
 
 namespace CWVR;
@@ -19,7 +17,7 @@ public static class Plugin
 {
     public const string PLUGIN_GUID = "io.daxcess.cwvr";
     public const string PLUGIN_NAME = "CWVR";
-    public const string PLUGIN_VERSION = "1.1.1";
+    public const string PLUGIN_VERSION = "1.1.2";
 
     private const string BANNER =
         "                             ,--.,--.                         \n ,-----.,--.   ,--.         /  //  /     ,--.   ,--.,------.  \n'  .--./|  |   |  |        /  //  /       \\  `.'  / |  .--. ' \n|  |    |  |.'.|  |       /  //  /         \\     /  |  '--'.' \n'  '--'\\|   ,'.   |      /  //  /           \\   /   |  |\\  \\  \n `-----''--'   '--'     /  //  /             `-'    `--' '--' \n                       `--'`--'                               \n\n             ___________________________ \n            < Another VR mod by DaXcess >\n             --------------------------- \n                    \\   ^__^\n                     \\  (oo)\\_______\n                        (__)\\       )\\/\\\n                            ||----w |\n                            ||     ||\n";
@@ -91,6 +89,24 @@ public static class Plugin
         Flags |= Flags.VR;
     }
 
+    public static void ToggleVR()
+    {
+        if (Flags.HasFlag(Flags.VR))
+        {
+            OpenXR.Loader.DeinitializeXR();
+            HarmonyPatcher.UnpatchVR();
+            
+            Flags &= ~Flags.VR;
+        }
+        else
+        {
+            if (!InitializeVR())
+                return;
+            
+            Flags |= Flags.VR;
+        }
+    }
+
     private static bool InitializeVR()
     {
         Logger.LogInfo("Loading VR...");
@@ -120,13 +136,6 @@ public static class Plugin
         HarmonyPatcher.PatchVR();
         
         Logger.LogDebug("Inserted VR patches using Harmony");
-
-        var pass = new XROcclusionMeshPass(RenderPassEvent.BeforeRendering);
-
-        RenderPipelineManager.beginCameraRendering += (context, camera) =>
-        {
-            camera.GetUniversalAdditionalCameraData().scriptableRenderer.EnqueuePass(pass);
-        };
         
         return true;
     }

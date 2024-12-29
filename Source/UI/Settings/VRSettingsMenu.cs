@@ -66,114 +66,118 @@ public class VRSettingsMenu : MonoBehaviour
 
         // BepInEx only configuration cells
 
-        #if BEPINEX
-        
-        var categories = new Dictionary<string, List<KeyValuePair<ConfigDefinition, ConfigEntryBase>>>();
+#if BEPINEX
 
-        foreach (var entry in ((CWVR.MultiLoader.BepInEx.Config)Plugin.Config).File)
+        // We need to have both a compiler *and* a runtime check since during development both BEPINEX and NATIVE are defined
+        if (Plugin.Loader == Loader.BepInEx)
         {
-            // Skip internal
-            if (entry.Key.Section.ToLower() == "internal")
-                continue;
+            var categories = new Dictionary<string, List<KeyValuePair<ConfigDefinition, ConfigEntryBase>>>();
 
-            if (!categories.TryGetValue(entry.Key.Section, out var list))
+            foreach (var entry in ((CWVR.MultiLoader.BepInEx.Config)Plugin.Config).File)
             {
-                list = [];
-                categories.Add(entry.Key.Section, list);
+                // Skip internal
+                if (entry.Key.Section.ToLower() == "internal")
+                    continue;
+
+                if (!categories.TryGetValue(entry.Key.Section, out var list))
+                {
+                    list = [];
+                    categories.Add(entry.Key.Section, list);
+                }
+
+                list.Add(entry);
             }
 
-            list.Add(entry);
-        }
-
-        // Add settings derived from BepInEx/Config.cs
-        foreach (var (category, settings) in categories)
-        {
-            foreach (var (key, config) in settings)
+            // Add settings derived from BepInEx/Config.cs
+            foreach (var (category, settings) in categories)
             {
-                var name = key.Key;
-
-                if (config.SettingType.IsEnum)
+                foreach (var (key, config) in settings)
                 {
-                    var enumUI = Instantiate(AssetManager.EnumSettingCell, container);
-                    var text = enumUI.GetComponentInChildren<TextMeshProUGUI>();
-                    var dropdown = enumUI.GetComponentInChildren<TMP_Dropdown>();
-                    var entry = enumUI.GetComponentInChildren<ConfigEntry>();
+                    var name = key.Key;
 
-                    text.text = $"[CWVR] {Utils.PascalToLongString(name)}";
-                    entry.m_Category = category;
-                    entry.m_Name = name;
+                    if (config.SettingType.IsEnum)
+                    {
+                        var enumUI = Instantiate(AssetManager.EnumSettingCell, container);
+                        var text = enumUI.GetComponentInChildren<TextMeshProUGUI>();
+                        var dropdown = enumUI.GetComponentInChildren<TMP_Dropdown>();
+                        var entry = enumUI.GetComponentInChildren<ConfigEntry>();
 
-                    var names = Enum.GetNames(config.SettingType);
-                    var idx = Array.FindIndex(names, name => name == config.BoxedValue.ToString());
+                        text.text = $"[CWVR] {Utils.PascalToLongString(name)}";
+                        entry.m_Category = category;
+                        entry.m_Name = name;
 
-                    dropdown.ClearOptions();
-                    dropdown.AddOptions([.. names]);
-                    dropdown.SetValueWithoutNotify(idx);
+                        var names = Enum.GetNames(config.SettingType);
+                        var idx = Array.FindIndex(names, name => name == config.BoxedValue.ToString());
 
-                    uiList.Add(enumUI);
-                }
-                else if (config.SettingType == typeof(float) &&
-                         config.Description.AcceptableValues is AcceptableValueRange<float> floatValues)
-                {
-                    var sliderUI = Instantiate(AssetManager.SliderSettingCell, container);
-                    var text = sliderUI.GetComponentInChildren<TextMeshProUGUI>();
-                    var slider = sliderUI.GetComponentInChildren<Slider>();
-                    var input = sliderUI.GetComponentInChildren<TMP_InputField>();
-                    var entry = sliderUI.GetComponentInChildren<ConfigEntry>();
+                        dropdown.ClearOptions();
+                        dropdown.AddOptions([.. names]);
+                        dropdown.SetValueWithoutNotify(idx);
 
-                    text.text = $"[CWVR] {Utils.PascalToLongString(name)}";
-                    entry.m_Category = category;
-                    entry.m_Name = name;
+                        uiList.Add(enumUI);
+                    }
+                    else if (config.SettingType == typeof(float) &&
+                             config.Description.AcceptableValues is AcceptableValueRange<float> floatValues)
+                    {
+                        var sliderUI = Instantiate(AssetManager.SliderSettingCell, container);
+                        var text = sliderUI.GetComponentInChildren<TextMeshProUGUI>();
+                        var slider = sliderUI.GetComponentInChildren<Slider>();
+                        var input = sliderUI.GetComponentInChildren<TMP_InputField>();
+                        var entry = sliderUI.GetComponentInChildren<ConfigEntry>();
 
-                    slider.m_MaxValue = floatValues.MaxValue;
-                    slider.m_MinValue = floatValues.MinValue;
+                        text.text = $"[CWVR] {Utils.PascalToLongString(name)}";
+                        entry.m_Category = category;
+                        entry.m_Name = name;
 
-                    var value = Mathf.Round((float)config.BoxedValue * 100f) / 100f;
-                    slider.SetValueWithoutNotify(value);
-                    input.SetTextWithoutNotify(value.ToString(CultureInfo.InvariantCulture));
+                        slider.m_MaxValue = floatValues.MaxValue;
+                        slider.m_MinValue = floatValues.MinValue;
 
-                    uiList.Add(sliderUI);
-                }
-                else if (config.SettingType == typeof(int) &&
-                         config.Description.AcceptableValues is AcceptableValueRange<int> intValues)
-                {
-                    var sliderUI = Instantiate(AssetManager.SliderSettingCell, container);
-                    var text = sliderUI.GetComponentInChildren<TextMeshProUGUI>();
-                    var slider = sliderUI.GetComponentInChildren<Slider>();
-                    var input = sliderUI.GetComponentInChildren<TMP_InputField>();
-                    var entry = sliderUI.GetComponentInChildren<ConfigEntry>();
+                        var value = Mathf.Round((float)config.BoxedValue * 100f) / 100f;
+                        slider.SetValueWithoutNotify(value);
+                        input.SetTextWithoutNotify(value.ToString(CultureInfo.InvariantCulture));
 
-                    text.text = $"[CWVR] {Utils.PascalToLongString(name)}";
-                    entry.m_Category = category;
-                    entry.m_Name = name;
+                        uiList.Add(sliderUI);
+                    }
+                    else if (config.SettingType == typeof(int) &&
+                             config.Description.AcceptableValues is AcceptableValueRange<int> intValues)
+                    {
+                        var sliderUI = Instantiate(AssetManager.SliderSettingCell, container);
+                        var text = sliderUI.GetComponentInChildren<TextMeshProUGUI>();
+                        var slider = sliderUI.GetComponentInChildren<Slider>();
+                        var input = sliderUI.GetComponentInChildren<TMP_InputField>();
+                        var entry = sliderUI.GetComponentInChildren<ConfigEntry>();
 
-                    slider.m_MaxValue = intValues.MaxValue;
-                    slider.m_MinValue = intValues.MinValue;
-                    slider.m_WholeNumbers = true;
-                    slider.SetValueWithoutNotify((int)config.BoxedValue);
-                    input.SetTextWithoutNotify(config.BoxedValue.ToString());
+                        text.text = $"[CWVR] {Utils.PascalToLongString(name)}";
+                        entry.m_Category = category;
+                        entry.m_Name = name;
 
-                    uiList.Add(sliderUI);
-                }
-                else if (config.SettingType == typeof(bool))
-                {
-                    var boolUI = Instantiate(AssetManager.BooleanSettingCell, container);
-                    var text = boolUI.GetComponentInChildren<TextMeshProUGUI>();
-                    var dropdown = boolUI.GetComponentInChildren<TMP_Dropdown>();
-                    var entry = boolUI.GetComponentInChildren<ConfigEntry>();
+                        slider.m_MaxValue = intValues.MaxValue;
+                        slider.m_MinValue = intValues.MinValue;
+                        slider.m_WholeNumbers = true;
+                        slider.SetValueWithoutNotify((int)config.BoxedValue);
+                        input.SetTextWithoutNotify(config.BoxedValue.ToString());
 
-                    text.text = $"[CWVR] {Utils.PascalToLongString(name)}";
-                    entry.m_Category = category;
-                    entry.m_Name = name;
+                        uiList.Add(sliderUI);
+                    }
+                    else if (config.SettingType == typeof(bool))
+                    {
+                        var boolUI = Instantiate(AssetManager.BooleanSettingCell, container);
+                        var text = boolUI.GetComponentInChildren<TextMeshProUGUI>();
+                        var dropdown = boolUI.GetComponentInChildren<TMP_Dropdown>();
+                        var entry = boolUI.GetComponentInChildren<ConfigEntry>();
 
-                    dropdown.SetValueWithoutNotify((bool)config.BoxedValue ? 1 : 0);
+                        text.text = $"[CWVR] {Utils.PascalToLongString(name)}";
+                        entry.m_Category = category;
+                        entry.m_Name = name;
 
-                    uiList.Add(boolUI);
+                        dropdown.SetValueWithoutNotify((bool)config.BoxedValue ? 1 : 0);
+
+                        uiList.Add(boolUI);
+                    }
                 }
             }
         }
-        
-        #endif
+
+#endif
 
         cells = uiList.ToArray();
         

@@ -75,12 +75,20 @@ public class RemapManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        DestroySettings();
+        
         playerInput.onControlsChanged -= OnControlsChanged;
     }
 
     public void DisplaySettings(Transform container)
     {
         header = Instantiate(AssetManager.ControlSettingHeaderCell, container).GetComponent<ControlSettingHeader>();
+        
+        var headerSounds = header.GetComponentInChildren<UI_Sound>();
+        headerSounds.hoverSound = hoverSound;
+        headerSounds.clickSound = clickSound;
+
+        header.button.onClick.AddListener(ResetBindings);
         
         foreach (var remappableControl in AssetManager.RemappableControls.controls)
         {
@@ -162,6 +170,14 @@ public class RemapManager : MonoBehaviour
         }
     }
 
+    private void ResetBindings()
+    {
+        playerInput.actions.RemoveAllBindingOverrides();
+        Plugin.Config.ControllerBindingsOverride.Value = "";
+        
+        ReloadBindings();
+    }
+    
     /// <summary>
     /// Finalize the rebinding operation, and permanently update the binding configuration
     /// </summary>
@@ -174,10 +190,6 @@ public class RemapManager : MonoBehaviour
         
         binding.OnFinishRebind();
 
-        var huh = playerInput.actions.SaveBindingOverridesAsJson();
-
-        Plugin.Config.ControllerBindingsOverride.Value = huh;
-        
-        Logger.LogDebug(huh);
+        Plugin.Config.ControllerBindingsOverride.Value = playerInput.actions.SaveBindingOverridesAsJson();
     }
 }

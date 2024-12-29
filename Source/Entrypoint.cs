@@ -1,4 +1,5 @@
 using System.Collections;
+using CWVR.Experiments;
 using CWVR.Patches;
 using CWVR.Player;
 using CWVR.UI;
@@ -30,7 +31,10 @@ internal static class UniversalEntrypoint
     private static void OnGameEntered(GameAPI __instance)
     {
         if (__instance.name == "MainMenuGame")
+        {
+            __instance.gameObject.AddComponent<HotSwitcher>();
             return;
+        }
 
         __instance.StartCoroutine(Start());
     }

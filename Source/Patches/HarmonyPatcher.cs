@@ -19,6 +19,11 @@ internal static class HarmonyPatcher
         vrPatcher.Patch(CWVRPatchTarget.VROnly);
     }
 
+    public static void UnpatchVR()
+    {
+        vrPatcher.UnpatchSelf();
+    }
+
     private static void Patch(this Harmony patcher, CWVRPatchTarget target)
     {
         AccessTools.GetTypesFromAssembly(Assembly.GetExecutingAssembly()).Do((type) =>

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using CWVR.Assets;
 using CWVR.Input;
+using CWVR.Player;
 using Microsoft.MixedReality.Toolkit.Experimental.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -42,12 +43,9 @@ public class MainMenu : MonoBehaviour
         
         // Disable default input module
         FindObjectOfType<InputSystemUIInputModule>().enabled = false;
-        
-        // Prevent host button from being hidden
-        // GameObject.Find("Canvas").transform.Find("HostPage").GetComponents<ShowOnlyForScheme>().First().enabled = false;
 
         // Set up canvasses
-        var introCanvas = FindObjectOfType<IntroScreenAnimator>().GetComponent<Canvas>();
+        var introCanvas = FindObjectOfType<IntroScreenAnimator>(true).GetComponent<Canvas>();
         var mainMenuCanvas = MainMenuHandler.Instance.UIHandler.GetComponent<Canvas>();
         var modalCanvas = Modal.Instance.GetComponent<Canvas>();
 
@@ -96,8 +94,42 @@ public class MainMenu : MonoBehaviour
                 ], () => Plugin.Config.FirstTimeLaunch.Value = false);
         }
 
-        StartCoroutine(DisableDoF());
+        StartCoroutine(ToggleDoF(false));
         StartCoroutine(AutoRotate());
+    }
+
+    private void OnDestroy()
+    {
+        if (VRSession.InVR) // If we're still in VR we just went into a game, destroying will be done for us by the engine
+            return;
+        
+        // Revert camera
+        var camera = cameraTracker.gameObject;
+        Destroy(cameraTracker);
+
+        camera.transform.SetParent(transform);
+        camera.transform.localPosition = new Vector3(33.13f, 4.67f, 70.56f);
+        camera.transform.localEulerAngles = new Vector3(0, 162.6179f, 0);
+        
+        // Destroy XR origin
+        Destroy(xrOrigin.gameObject);
+        
+        // Re-enable default input system
+        FindObjectOfType<InputSystemUIInputModule>().enabled = false;
+        
+        // Revert canvasses
+        var introCanvas = FindObjectOfType<IntroScreenAnimator>(true).GetComponent<Canvas>();
+        var mainMenuCanvas = MainMenuHandler.Instance.UIHandler.GetComponent<Canvas>();
+        var modalCanvas = Modal.Instance.GetComponent<Canvas>();
+
+        introCanvas.renderMode = mainMenuCanvas.renderMode = modalCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        
+        // Destroy keyboard
+        Destroy(FindObjectOfType<AutoKeyboard>());
+        Destroy(FindObjectOfType<NonNativeKeyboard>(true).gameObject);
+        
+        // Re-enable Depth of Field
+        StartCoroutine(ToggleDoF(true));
     }
 
     private void CreateInteractorController(XRNode node)
@@ -222,9 +254,8 @@ public class MainMenu : MonoBehaviour
 
     /// <summary>
     /// Disable Depth of Field since it incorrectly blurs text on the world canvas.
-    /// I would like to be able to keep this though.
     /// </summary>
-    private static IEnumerator DisableDoF()
+    private static IEnumerator ToggleDoF(bool active)
     {
         PostVolumeHandler pvh;
         while ((pvh = FindObjectOfType<PostVolumeHandler>()) is null)
@@ -234,7 +265,7 @@ public class MainMenu : MonoBehaviour
         yield return new WaitUntil(() => pvh.m_volume.profile is not null);
         
         if (pvh.m_volume.profile.TryGet<DepthOfField>(out var dof))
-            dof.active = false;
+            dof.active = active;
     }
 
     private IEnumerator AutoRotate()

@@ -22,6 +22,10 @@ We have a dedicated section within the [Flat2VR Discord Server](https://discord.
 
 Look for the [`#cw-join`](https://discord.com/channels/747967102895390741/1236717861653712896) channel to join the Content Warning VR section.
 
+# Usage
+
+All usage information is stored on the [Thunderstore Page](https://thunderstore.io/c/content-warning/p/DaXcess/CWVR/), the rest of this README will only outline how to *manually* install the VR mod. Use either Thunderstore or the Steam Workshop if you're not planning to set aside a couple of hours to manually compile and install the mod.
+
 # Install from source
 
 To install the mod from the source code, you will first have to compile the mod. Instructions for this are available in [COMPILING.md](COMPILING.md).

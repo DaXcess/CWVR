@@ -63,4 +63,10 @@ You can change the mod configuration from within the game itself. Just launch th
 
 By default, the game only supports Oculus and Index controllers. If you are using any other type of controller, you can change the bindings in the `Controls` settings menu in the game settings.
 
-For a list of default controls, check out the controls [wiki page](https://thunderstore.io/c/content-warning/p/DaXcess/CWVR/wiki/1966-controls/) on Thunderstore. 
+For a list of default controls, check out the controls [wiki page](https://thunderstore.io/c/content-warning/p/DaXcess/CWVR/wiki/1966-controls/) on Thunderstore.
+
+# Hot Switching
+
+When you are inside the main menu of the game, you can press `F8` to hot switch between VR and flatscreen (this ignores any configuration or CLI options to disable VR).
+
+On failure this will still show you a popup and give you access to logs, making troubleshooting easier and faster (no more game restarts required).

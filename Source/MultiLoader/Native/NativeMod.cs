@@ -1,4 +1,5 @@
 using System;
+using CWVR.Experiments;
 using CWVR.UI;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -49,8 +50,11 @@ public class NativeMod
         early.UnpatchSelf();
 
         // Due to load order, we manually have to invoke the main menu entry point, as our patch got inserted too late
+        var api = Object.FindObjectOfType<GameAPI>().gameObject;
+        api.AddComponent<HotSwitcher>();
+        
         if (Plugin.Flags.HasFlag(Flags.VR))
-            Object.FindObjectOfType<GameAPI>().gameObject.AddComponent<MainMenu>();
+            api.AddComponent<MainMenu>();
     }
 
     private static bool CheckBepInExDuplicate()

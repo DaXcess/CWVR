@@ -1,23 +1,28 @@
 using CWVR.Assets;
 using CWVR.Input;
 using HarmonyLib;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using Zorro.ControllerSupport;
 
 namespace CWVR.Patches;
 
 [CWVRPatch]
-public static class InputPatches
+internal static class InputPatches
 {
+    private static InputActionAsset originalActions;
+    
     /// <summary>
     /// Replace the content warning inputs with VR inputs
     /// </summary>
     [HarmonyPatch(typeof(InputHandler), nameof(InputHandler.OnCreated))]
     [HarmonyPostfix]
-    private static void OnCreateInputHandler(InputHandler __instance)
+    public static void OnCreateInputHandler(InputHandler __instance)
     {
         var playerInput = __instance.m_playerInput;
 
+        originalActions = playerInput.actions;
+        
         playerInput.actions = AssetManager.InputActions;
         playerInput.defaultActionMap = "Player";
         playerInput.neverAutoSwitchControlSchemes = false;
@@ -27,6 +32,20 @@ public static class InputPatches
         playerInput.enabled = true;
 
         __instance.gameObject.AddComponent<RemapManager>();
+    }
+
+    /// <summary>
+    /// Revert VR inputs with vanilla inputs if we left VR
+    /// </summary>
+    public static void OnLeaveVR()
+    {
+        var playerInput = InputHandler.Instance.m_playerInput;
+        
+        Object.Destroy(InputHandler.Instance.GetComponent<RemapManager>());
+        
+        playerInput.actions = originalActions;
+        playerInput.enabled = false;
+        playerInput.enabled = true;
     }
 
     /// <summary>

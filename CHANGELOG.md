@@ -1,3 +1,9 @@
+# 1.1.2
+
+- Added hot VR loading, by pressing `F8` while in the main menu to toggle VR on or off
+- Added a button to reset VR keybinds in the controls menu
+- Fixed an issue where unknown controller profiles couldn't rebind or use certain controls
+
 # 1.1.1
 
 - Added a popup in game when VR fails to load, allowing easier access to logs

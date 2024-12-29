@@ -29,3 +29,7 @@ You can toggle this behavior in the settings.
 | Spectate Previous Player | Left Trigger Button       |
 
 > Other built-in controller types coming later
+
+### Hot Switching
+
+You can hot switch between VR and flatscreen on the main menu using `F8`. This binding cannot be changed.
