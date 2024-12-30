@@ -1,3 +1,12 @@
+# 1.1.3
+
+- Added unseeded* bindings for WMR
+- Added unseeded* bindings for Valve Index
+- Added unseeded* bindings for HTC Vive
+- Added unseeded* bindings for HP Reverb
+
+> \*No specialized bindings have been created for these controllers, manually editing the bindings is required 
+
 # 1.1.2
 
 - Added hot VR loading, by pressing `F8` while in the main menu to toggle VR on or off
