@@ -45,7 +45,7 @@ internal static class PlayerItemsPatches
         {
             case < 0:
                 __instance.player.data.selectedItemSlot =
-                    (__instance.player.data.selectedItemSlot + 0 + TOTAL_SLOTS) % TOTAL_SLOTS;
+                    (__instance.player.data.selectedItemSlot - 1 + TOTAL_SLOTS) % TOTAL_SLOTS;
                 break;
 
             case > 0:
