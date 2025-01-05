@@ -45,9 +45,10 @@ public class Config : IConfig
         GameHandler.Instance.SettingsHandler.GetSetting<SmoothTurnSpeedSetting>();
 
     public IConfigEntry<int> SnapTurnSize => GameHandler.Instance.SettingsHandler.GetSetting<SnapTurnSizeSetting>();
-    
-    public IConfigEntry<bool> ToggleSprint => GameHandler.Instance.SettingsHandler.GetSetting<PressToSprintSetting>();
 
+    public IConfigEntry<IConfig.SprintActivationMode> SprintActivation =>
+        GameHandler.Instance.SettingsHandler.GetSetting<SprintActivationSetting>();
+    
     public IConfigEntry<bool> InteractToZoom =>
         GameHandler.Instance.SettingsHandler.GetSetting<InteractToZoomSetting>();
 
@@ -217,7 +218,6 @@ public class OcclusionMeshSetting : EnumSetting, IExposedSetting, IConfigEntry<b
 [UsedImplicitly]
 public class TurnProviderSetting : EnumSetting, IExposedSetting, IConfigEntry<IConfig.TurnProviderOption>
 {
-    
     public new IConfig.TurnProviderOption Value
     {
         get => (IConfig.TurnProviderOption)base.Value;
@@ -297,12 +297,12 @@ public class SnapTurnSizeSetting : FloatSetting, IExposedSetting, IConfigEntry<i
 
 [ContentWarningSetting]
 [UsedImplicitly]
-public class PressToSprintSetting : EnumSetting, IExposedSetting, IConfigEntry<bool>
+public class SprintActivationSetting : EnumSetting, IExposedSetting, IConfigEntry<IConfig.SprintActivationMode>
 {
-    public new bool Value
+    public new IConfig.SprintActivationMode Value
     {
-        get => base.Value == 1;
-        set => base.Value = value ? 1 : 0;
+        get => (IConfig.SprintActivationMode)base.Value;
+        set => base.Value = (int)value;
     }
 
     public override void ApplyValue()
@@ -311,7 +311,7 @@ public class PressToSprintSetting : EnumSetting, IExposedSetting, IConfigEntry<b
 
     public override int GetDefaultValue() => 0;
 
-    public override List<string> GetChoices() => ["Press", "Hold"];
+    public override List<string> GetChoices() => Enum.GetNames(typeof(IConfig.SprintActivationMode)).ToList();
 
     public SettingCategory GetSettingCategory() => SettingCategory.Mods;
 

@@ -37,7 +37,7 @@ public class VRSettingsMenu : MonoBehaviour
         var uiList = new List<GameObject>();
 
         // Add OpenXR Runtime setting
-        if (OpenXR.GetRuntimes(out var runtimes))
+        if (OpenXR.GetRuntimes() is var runtimes && runtimes.Count > 0)
         {
             var enumUI = Instantiate(AssetManager.EnumSettingCell, container);
             var text = enumUI.GetComponentInChildren<TextMeshProUGUI>();
@@ -208,7 +208,7 @@ public class VRSettingsMenu : MonoBehaviour
             return;
         }
 
-        if (!OpenXR.GetRuntimes(out var runtimes))
+        if (OpenXR.GetRuntimes() is var runtimes && runtimes.Count == 0)
         {
             Modal.ShowError("Error", "Failed to query system installed OpenXR runtimes");
             return;

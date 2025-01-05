@@ -1,6 +1,7 @@
 using System;
 using BepInEx.Configuration;
 using CWVR.MultiLoader.Common;
+using CWVR.Patches;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
@@ -61,12 +62,15 @@ public class Config(ConfigFile file) : IConfig
             "The amount of rotation that is applied when performing a snap turn. Requires turn provider to be set to snap.",
             new AcceptableValueRange<int>(10, 180))));
 
-    public IConfigEntry<bool> ToggleSprint { get; } = new WrappedConfigEntry<bool>(file.Bind("Input", "ToggleSprint",
-        false,
-        "Whether the sprint button should toggle sprint instead of having to hold it down."));
+    public IConfigEntry<IConfig.SprintActivationMode> SprintActivation { get; } =
+        new WrappedConfigEntry<IConfig.SprintActivationMode>(file.Bind("Input", nameof(SprintActivation),
+            IConfig.SprintActivationMode.Press,
+            new ConfigDescription(
+                "Determines the way sprint should be used: whether you need to hold the button, or only press it once.",
+                new AcceptableValueEnum<IConfig.SprintActivationMode>())));
 
     public IConfigEntry<bool> InteractToZoom { get; } = new WrappedConfigEntry<bool>(file.Bind("Input",
-        "InteractToZoom", false,
+        "InteractToZoom", true,
         "Require holding the interact button to zoom the camera. Removes the need to hold interact to swap items."));
 
     // Internal configuration
@@ -86,6 +90,8 @@ public class Config(ConfigFile file) : IConfig
 
     public void ApplySettings()
     {
+        XRPatches.EnableOcclusionMesh = EnableOcclusionMesh.Value;
+        
         var asset = QualitySettings.renderPipeline as UniversalRenderPipelineAsset;
         if (asset == null) // It would be very weird if this is true
             return;

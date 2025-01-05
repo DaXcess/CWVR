@@ -1,5 +1,6 @@
 using CWVR.Assets;
 using CWVR.Input;
+using CWVR.MultiLoader.Common;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -91,12 +92,14 @@ internal static class InputPatches
     [HarmonyPostfix]
     private static void InjectSprintValue(global::Player.PlayerInput __instance)
     {
-        if (!Plugin.Config.ToggleSprint.Value)
+        var canTakeInput = GlobalInputHandler.CanTakeInput();
+
+        if (Plugin.Config.SprintActivation.Value == IConfig.SprintActivationMode.Hold)
         {
             __instance.sprintIsPressed =
-                GlobalInputHandler.CanTakeInput() && __instance.sprintAction.action.IsPressed();
+                canTakeInput && __instance.sprintAction.action.IsPressed();
         }
-        else if (GlobalInputHandler.CanTakeInput())
+        else if (canTakeInput)
         {
             if (!__instance.isControllerSprinting)
                 __instance.isControllerSprinting = __instance.sprintAction.action.WasPressedThisFrame();

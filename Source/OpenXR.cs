@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Steamworks;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Management;
@@ -16,19 +18,19 @@ using UnityEngine.XR.OpenXR.Features.Interactions;
 namespace CWVR;
 
 internal static class OpenXR
-{ 
+{
     [DllImport("UnityOpenXR", EntryPoint = "DiagnosticReport_GenerateReport")]
     private static extern IntPtr Internal_GenerateReport();
 
     [DllImport("UnityOpenXR", EntryPoint = "DiagnosticReport_ReleaseReport")]
     private static extern void Internal_ReleaseReport(IntPtr report);
-    
+
     [DllImport("UnityOpenXR", EntryPoint = "NativeConfig_GetRuntimeName")]
     private static extern bool Internal_GetRuntimeName(out IntPtr runtimeNamePtr);
 
     [DllImport("UnityOpenXR", EntryPoint = "NativeConfig_GetRuntimeVersion")]
     private static extern bool Internal_GetRuntimeVersion(out ushort major, out ushort minor, out ushort patch);
-    
+
     /// <summary>
     /// Generate an OpenXR diagnostics report
     /// </summary>
@@ -43,70 +45,67 @@ internal static class OpenXR
 
         return result;
     }
-    
-     /// <summary>
+
+    /// <summary>
     /// Attempt to enumerate installed OpenXR runtimes as described by the <a href="https://registry.khronos.org/OpenXR/specs/1.1/loader.html#runtime-discovery">OpenXR standard</a>.
     /// </summary>
-    public static bool GetRuntimes(out Runtimes runtimes)
+    public static Runtimes GetRuntimes()
     {
-        runtimes = new Runtimes([]);
-        
+        var runtimes = new HashSet<Runtime>();
+
+        foreach (var rt in LocateCommonRuntimes())
+            runtimes.Add(rt);
+
+        var defaultPath = GetDefaultRuntimePath();
+
         if (Native.RegOpenKeyEx(Native.HKEY_LOCAL_MACHINE, "SOFTWARE\\Khronos\\OpenXR\\1", 0, 0x20019, out var hKey) !=
             0)
-            return false;
-
-        var defaultRuntimePath = "";
-
-        var cbData = 0u;
-        if (Native.RegQueryValueEx(hKey, "ActiveRuntime", 0, out var type, null, ref cbData) == 0 && type is 0x1 or 0x2)
-        {
-            var data = new StringBuilder((int)cbData);
-            if (Native.RegQueryValueEx(hKey, "ActiveRuntime", 0, out type, data, ref cbData) == 0)
-                defaultRuntimePath = data.ToString();
-        }
+            return new Runtimes(runtimes.ToArray());
 
         var files = new List<string>();
         if (!Native.RegOpenSubKey(ref hKey, "AvailableRuntimes", 0x20019) || !EnumRuntimeFiles(hKey, files))
         {
             // Only return the default runtime
 
+            if (string.IsNullOrEmpty(defaultPath))
+                return new Runtimes(runtimes.ToArray());
+
             try
             {
                 var runtimeInfo =
-                    JsonConvert.DeserializeObject<JToken>(File.ReadAllText(defaultRuntimePath))["runtime"];
+                    JsonConvert.DeserializeObject<JToken>(File.ReadAllText(defaultPath))["runtime"];
 
-                runtimes = new Runtimes([
+                runtimes.Add(
                     new Runtime
                     {
                         Name = runtimeInfo?["name"]?.ToObject<string>(),
-                        Path = defaultRuntimePath,
+                        Path = defaultPath,
                         Default = true
                     }
-                ]);
-
-                return true;
+                );
             }
             catch
             {
-                return false;
+                // ignored
             }
+
+            return new Runtimes(runtimes.ToArray());
         }
 
-        if (!files.Contains(defaultRuntimePath))
-            files.Add(defaultRuntimePath);
+        if (!files.Contains(defaultPath))
+            files.Add(defaultPath);
 
-        var rtList = new List<Runtime>();
         foreach (var file in files)
         {
             try
             {
                 var runtimeInfo = JsonConvert.DeserializeObject<JToken>(File.ReadAllText(file))["runtime"];
 
-                rtList.Add(new Runtime()
+                runtimes.Add(new Runtime
                 {
                     Name = runtimeInfo?["name"]?.ToObject<string>(),
                     Path = file,
-                    Default = file == defaultRuntimePath
+                    Default = file == defaultPath
                 });
             }
             catch (Exception ex)
@@ -115,11 +114,29 @@ internal static class OpenXR
             }
         }
 
-        runtimes = new Runtimes(rtList.ToArray());
-
-        return true;
+        return new Runtimes(runtimes.ToArray());
     }
-     
+
+    [CanBeNull]
+    private static string GetDefaultRuntimePath()
+    {
+        if (Native.RegOpenKeyEx(Native.HKEY_LOCAL_MACHINE, "SOFTWARE\\Khronos\\OpenXR\\1", 0, 0x20019, out var hKey) !=
+            0)
+            return null;
+
+        string defaultRuntimePath = null;
+
+        var cbData = 0u;
+        if (Native.RegQueryValueEx(hKey, "ActiveRuntime", 0, out var type, null, ref cbData) != 0 ||
+            type is not (0x1 or 0x2)) return null;
+
+        var data = new StringBuilder((int)cbData);
+        if (Native.RegQueryValueEx(hKey, "ActiveRuntime", 0, out type, data, ref cbData) == 0)
+            defaultRuntimePath = data.ToString();
+
+        return defaultRuntimePath;
+    }
+
     private static bool EnumRuntimeFiles(IntPtr hKey, List<string> files)
     {
         if (Native.RegQueryInfoKey(hKey, null, IntPtr.Zero, IntPtr.Zero, out _, out _, out _, out var valueCount,
@@ -140,7 +157,36 @@ internal static class OpenXR
 
         return true;
     }
-    
+
+    /// <summary>
+    /// Locate common paths for runtimes
+    /// </summary>
+    private static IEnumerable<Runtime> LocateCommonRuntimes()
+    {
+        Runtime rt;
+
+        // 1. SteamVR
+        if (SteamAPI.Init() && SteamApps.GetAppInstallDir(new AppId_t(250820), out var path, 240) > 0)
+        {
+            if (Runtime.ReadFromJson(Path.Combine(path, "steamxr_win64.json"), out rt))
+                yield return rt;
+        }
+
+        // 2. Virtual Desktop
+        path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+            @"Virtual Desktop Streamer\OpenXR\virtualdesktop-openxr.json");
+
+        if (File.Exists(path) && Runtime.ReadFromJson(path, out rt))
+            yield return rt;
+
+        // 3. Oculus
+        path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+            @"Oculus\Support\oculus-runtime\oculus_openxr_64.json");
+
+        if (File.Exists(path) && Runtime.ReadFromJson(path, out rt))
+            yield return rt;
+    }
+
     public static bool GetActiveRuntimeName(out string name)
     {
         name = null;
@@ -209,11 +255,48 @@ internal static class OpenXR
         }
     }
 
-    public struct Runtime
+    public struct Runtime : IEquatable<Runtime>
     {
         public string Name { get; set; }
         public string Path { get; set; }
         public bool Default { get; set; }
+
+        public static bool ReadFromJson(string path, out Runtime runtime)
+        {
+            runtime = new Runtime();
+
+            try
+            {
+                var runtimeInfo = JsonConvert.DeserializeObject<JToken>(File.ReadAllText(path))["runtime"];
+
+                runtime.Name = runtimeInfo?["name"]?.ToObject<string>();
+                runtime.Path = path;
+
+                if (GetDefaultRuntimePath() is { } defaultPath)
+                    runtime.Default = string.Equals(path, defaultPath, StringComparison.CurrentCultureIgnoreCase);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool Equals(Runtime other)
+        {
+            return Path == other.Path;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Runtime other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Path);
+        }
     }
 
     public static class Loader
@@ -234,9 +317,10 @@ internal static class OpenXR
                 return InitializeXR(null);
             }
 
-            if (!GetRuntimes(out var runtimes) || runtimes.Count == 0)
+            if (GetRuntimes() is var runtimes && runtimes.Count == 0)
             {
-                Logger.LogWarning("Failed to query runtimes, or no runtimes were found. Falling back to default behavior.");
+                Logger.LogWarning(
+                    "Failed to query runtimes, or no runtimes were found. Falling back to default behavior.");
 
                 return InitializeXR(string.IsNullOrEmpty(Plugin.Config.OpenXRRuntimeFile.Value)
                     ? null
@@ -305,7 +389,7 @@ internal static class OpenXR
 
             var displays = new List<XRDisplaySubsystem>();
             SubsystemManager.GetInstances(displays);
-            
+
             if (Plugin.Config.EnableVerboseLogging.Value)
             {
                 Logger.LogWarning("OpenXR Diagnostics Report:");

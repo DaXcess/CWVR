@@ -22,7 +22,7 @@ public interface IConfig
     public IConfigEntry<TurnProviderOption> TurnProvider { get; }
     public IConfigEntry<float> SmoothTurnSpeedModifier { get; }
     public IConfigEntry<int> SnapTurnSize { get; }
-    public IConfigEntry<bool> ToggleSprint { get; }
+    public IConfigEntry<SprintActivationMode> SprintActivation { get; }
     public IConfigEntry<bool> InteractToZoom { get; }
     
     // Internal configuration
@@ -36,6 +36,12 @@ public interface IConfig
         Snap,
         Smooth,
         Disabled
+    }
+
+    public enum SprintActivationMode
+    {
+        Hold,
+        Press
     }
 }
 

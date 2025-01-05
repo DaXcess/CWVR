@@ -17,7 +17,7 @@ public static class Plugin
 {
     public const string PLUGIN_GUID = "io.daxcess.cwvr";
     public const string PLUGIN_NAME = "CWVR";
-    public const string PLUGIN_VERSION = "1.1.3";
+    public const string PLUGIN_VERSION = "1.1.4";
 
     private const string BANNER =
         "                             ,--.,--.                         \n ,-----.,--.   ,--.         /  //  /     ,--.   ,--.,------.  \n'  .--./|  |   |  |        /  //  /       \\  `.'  / |  .--. ' \n|  |    |  |.'.|  |       /  //  /         \\     /  |  '--'.' \n'  '--'\\|   ,'.   |      /  //  /           \\   /   |  |\\  \\  \n `-----''--'   '--'     /  //  /             `-'    `--' '--' \n                       `--'`--'                               \n\n             ___________________________ \n            < Another VR mod by DaXcess >\n             --------------------------- \n                    \\   ^__^\n                     \\  (oo)\\_______\n                        (__)\\       )\\/\\\n                            ||----w |\n                            ||     ||\n";

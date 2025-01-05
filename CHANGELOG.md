@@ -1,3 +1,12 @@
+# 1.1.4
+
+- Added additional scanning for OpenXR runtimes
+- Changed the invite friend button to open the SteamVR overlay (if possible), otherwise it shows a modal
+- Changed the BepInEx version of "InteractToZoom" to be enabled by default, just like the native version
+- Fixed scrolling backwards in the inventory (By @gingerphoenix10 in https://github.com/DaXcess/CWVR/pull/27)
+- Fixed sprint activation option being the wrong way around
+- Fixed 'EnableOcclusionMesh' option being ignored in the BepInEx version
+
 # 1.1.3
 
 - Added unseeded* bindings for WMR
