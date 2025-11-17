@@ -18,7 +18,7 @@ internal static class VREntrypoint
     {
         if (__instance.name != "MainMenuGame")
             return;
-        
+
         __instance.gameObject.AddComponent<MainMenu>();
     }
 }

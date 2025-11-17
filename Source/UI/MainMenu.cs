@@ -12,6 +12,8 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 
 namespace CWVR.UI;
@@ -38,14 +40,14 @@ public class MainMenu : MonoBehaviour
         cameraTracker.trackingStateInput = new InputActionProperty(Actions.Instance.HeadTrackingState);
 
         // Setup interactors
-        CreateInteractorController(XRNode.LeftHand);
-        CreateInteractorController(XRNode.RightHand);
-        
+        Instantiate(AssetManager.MenuControllers, xrOrigin);
+
         // Disable default input module
-        FindObjectOfType<InputSystemUIInputModule>().enabled = false;
+        FindFirstObjectByType<InputSystemUIInputModule>().enabled = false;
 
         // Set up canvasses
-        var introCanvas = FindObjectOfType<IntroScreenAnimator>(true).GetComponent<Canvas>();
+        // TODO: This doesn't work with Hotswap
+        var introCanvas = FindFirstObjectByType<IntroScreenAnimator>(FindObjectsInactive.Include).GetComponent<Canvas>();
         var mainMenuCanvas = MainMenuHandler.Instance.UIHandler.GetComponent<Canvas>();
         var modalCanvas = Modal.Instance.GetComponent<Canvas>();
 
@@ -115,141 +117,21 @@ public class MainMenu : MonoBehaviour
         Destroy(xrOrigin.gameObject);
         
         // Re-enable default input system
-        FindObjectOfType<InputSystemUIInputModule>().enabled = false;
+        FindFirstObjectByType<InputSystemUIInputModule>().enabled = false;
         
         // Revert canvasses
-        var introCanvas = FindObjectOfType<IntroScreenAnimator>(true).GetComponent<Canvas>();
+        var introCanvas = FindFirstObjectByType<IntroScreenAnimator>(FindObjectsInactive.Include).GetComponent<Canvas>();
         var mainMenuCanvas = MainMenuHandler.Instance.UIHandler.GetComponent<Canvas>();
         var modalCanvas = Modal.Instance.GetComponent<Canvas>();
 
         introCanvas.renderMode = mainMenuCanvas.renderMode = modalCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
         
         // Destroy keyboard
-        Destroy(FindObjectOfType<AutoKeyboard>());
-        Destroy(FindObjectOfType<NonNativeKeyboard>(true).gameObject);
+        Destroy(FindFirstObjectByType<AutoKeyboard>());
+        Destroy(FindFirstObjectByType<NonNativeKeyboard>(FindObjectsInactive.Include).gameObject);
         
         // Re-enable Depth of Field
         StartCoroutine(ToggleDoF(true));
-    }
-
-    private void CreateInteractorController(XRNode node)
-    {
-        var go = new GameObject($"{node} Controller");
-        go.transform.SetParent(xrOrigin, false);
-        
-        var controller = go.AddComponent<ActionBasedController>();
-        var interactor = go.AddComponent<XRRayInteractor>();
-        var visual = go.AddComponent<XRInteractorLineVisual>();
-        var renderer = go.GetComponent<LineRenderer>();
-        var sortingGroup = go.AddComponent<SortingGroup>();
-
-        sortingGroup.sortingOrder = 5;
-
-        interactor.rayOriginTransform.localEulerAngles = node switch
-        {
-            XRNode.LeftHand => new Vector3(60, 347, 90),
-            XRNode.RightHand => new Vector3(60, 347, 270),
-            _ => throw new ArgumentOutOfRangeException(nameof(node), node, null)
-        };
-
-        visual.lineBendRatio = 1;
-        visual.invalidColorGradient = new Gradient
-        {
-            mode = GradientMode.Blend,
-            alphaKeys =
-            [
-                new GradientAlphaKey(0.1f, 0), new GradientAlphaKey(0.1f, 1)
-            ],
-            colorKeys =
-            [
-                new GradientColorKey(Color.white, 0),
-                new GradientColorKey(Color.white, 1)
-            ]
-        };
-        visual.enabled = true;
-
-        renderer.material = AssetManager.WhiteMat;
-
-        controller.enableInputTracking = true;
-        controller.enableInputActions = true;
-
-        switch (node)
-        {
-            case XRNode.LeftHand:
-                controller.positionAction = new InputActionProperty(Actions.Instance.LeftHandPosition);
-                controller.rotationAction = new InputActionProperty(Actions.Instance.LeftHandRotation);
-                controller.trackingStateAction = new InputActionProperty(Actions.Instance.LeftHandTrackingState);
-
-                controller.selectAction =
-                    new InputActionProperty(AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/Select"));
-                controller.selectActionValue =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/Select Value"));
-                controller.activateAction =
-                    new InputActionProperty(AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/Activate"));
-                controller.activateActionValue =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/Activate Value"));
-                controller.uiPressAction =
-                    new InputActionProperty(AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/UI Press"));
-                controller.uiPressActionValue =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/UI Press Value"));
-                controller.uiScrollAction =
-                    new InputActionProperty(AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/UI Scroll"));
-                controller.rotateAnchorAction =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/Rotate Anchor"));
-                controller.translateAnchorAction =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/Translate Anchor"));
-                controller.scaleToggleAction =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/Scale Toggle"));
-                controller.scaleDeltaAction =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Left Hand/Scale Delta"));
-                break;
-
-            case XRNode.RightHand:
-                controller.positionAction = new InputActionProperty(Actions.Instance.RightHandPosition);
-                controller.rotationAction = new InputActionProperty(Actions.Instance.RightHandRotation);
-                controller.trackingStateAction = new InputActionProperty(Actions.Instance.RightHandTrackingState);
-
-                controller.selectAction =
-                    new InputActionProperty(AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/Select"));
-                controller.selectActionValue =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/Select Value"));
-                controller.activateAction =
-                    new InputActionProperty(AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/Activate"));
-                controller.activateActionValue =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/Activate Value"));
-                controller.uiPressAction =
-                    new InputActionProperty(AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/UI Press"));
-                controller.uiPressActionValue =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/UI Press Value"));
-                controller.uiScrollAction =
-                    new InputActionProperty(AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/UI Scroll"));
-                controller.rotateAnchorAction =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/Rotate Anchor"));
-                controller.translateAnchorAction =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/Translate Anchor"));
-                controller.scaleToggleAction =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/Scale Toggle"));
-                controller.scaleDeltaAction =
-                    new InputActionProperty(
-                        AssetManager.DefaultXRActions.FindAction("Actions - Right Hand/Scale Delta"));
-                break;
-
-            default:
-                throw new ArgumentException("Must be either a left hand or right hand node", nameof(node));
-        }
     }
 
     /// <summary>
@@ -258,7 +140,7 @@ public class MainMenu : MonoBehaviour
     private static IEnumerator ToggleDoF(bool active)
     {
         PostVolumeHandler pvh;
-        while ((pvh = FindObjectOfType<PostVolumeHandler>()) is null)
+        while ((pvh = FindFirstObjectByType<PostVolumeHandler>()) is null)
             yield return null;
 
         yield return new WaitUntil(() => pvh.m_volume is not null);

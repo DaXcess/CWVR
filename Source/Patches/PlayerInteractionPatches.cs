@@ -16,10 +16,9 @@ internal static class PlayerInteractionPatches
     private static IEnumerable<CodeInstruction> HandFindBestInteractablePatch(IEnumerable<CodeInstruction> instructions)
     {
         return new CodeMatcher(instructions)
-            .Advance(1)
-            .RemoveInstructions(15)
+            .Start()
+            .RemoveInstructions(14)
             .InsertAndAdvance(
-                new CodeInstruction(OpCodes.Nop),
                 new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(VRSession), nameof(VRSession.Instance))),
                 new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(VRSession), nameof(VRSession.LocalPlayer))),
                 new CodeInstruction(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(VRPlayer), nameof(VRPlayer.PrimaryInteractor))),

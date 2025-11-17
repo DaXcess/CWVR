@@ -13,21 +13,12 @@ namespace CWVR.UI.Settings;
 public class VRSettingsMenu : MonoBehaviour
 {
     public static VRSettingsMenu Instance { get; private set; }
-    
-    private SFX_Instance hoverSound;
-    private SFX_Instance clickSound;
 
     private TMP_Dropdown runtimesDropdown;
 
     private void Awake()
     {
         Instance = this;
-        
-        // Grab sound effects from another UI element
-        var button = FindObjectOfType<EscapeMenuButton>();
-
-        hoverSound = button.hoverSound;
-        clickSound = button.clickSound;
     }
     
     private GameObject[] cells = [];
@@ -180,12 +171,14 @@ public class VRSettingsMenu : MonoBehaviour
 #endif
 
         cells = uiList.ToArray();
-        
+
+        var button = FindAnyObjectByType<EscapeMenuButton>(FindObjectsInactive.Include);
+
         foreach (var cell in cells)
         foreach (var uiSound in cell.GetComponentsInChildren<UI_Sound>(true))
         {
-            uiSound.hoverSound = hoverSound;
-            uiSound.clickSound = clickSound;
+            uiSound.hoverSound = button.hoverSound;
+            uiSound.clickSound = button.clickSound;
         }
     }
 

@@ -4,11 +4,11 @@
         <TargetFramework>netstandard2.1</TargetFramework>
         <Description>CWVR Preloader</Description>
         <Authors>DaXcess</Authors>
-        <Version>1.1.4</Version>
+        <Version>1.2.0</Version>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>12.0</LangVersion>
         <Title>CWVR.Preload</Title>
-        <Copyright>Copyright (c) DaXcess 2024</Copyright>
+        <Copyright>Copyright (c) DaXcess 2025</Copyright>
         <PackageProjectUrl>https://github.com/DaXcess/CWVR</PackageProjectUrl>
         <RepositoryUrl>https://github.com/DaXcess/CWVR</RepositoryUrl>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -29,7 +29,7 @@
 
     <ItemGroup>
         <PackageReference Include="BepInEx.Core" Version="5.4.21" />
-        <PackageReference Include="ContentWarning" Version="1.19.4" />
+        <PackageReference Include="ContentWarning" Version="1.20.1" />
     </ItemGroup>
 
 </Project>

@@ -4,11 +4,11 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>CWVR</AssemblyName>
     <Description>Recording creatures in VR</Description>
-    <Version>1.1.4</Version>
+    <Version>1.2.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <Title>ContentWarningVR</Title>
-    <Copyright>Copyright (c) DaXcess 2024</Copyright>
+    <Copyright>Copyright (c) DaXcess 2025</Copyright>
     <PackageProjectUrl>https://github.com/DaXcess/CWVR</PackageProjectUrl>
     <RepositoryUrl>https://github.com/DaXcess/CWVR</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -19,23 +19,23 @@
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Analyzers" Version="1.0.8" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.Core" Version="5.*" />
-    <PackageReference Include="ContentWarning" Version="1.19.4" />
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <PackageReference Include="ContentWarning" Version="1.20.1" />
     <PackageReference Include="CW.Zorro" Version="1.19.4" />
     <PackageReference Include="HBAO.Universal" Version="1.9.0-cw" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="PhotonUnityNetworking" Version="1.9.0-cw" />
     <PackageReference Include="Unity.Animation.Rigging" Version="1.2.1" />
-    <PackageReference Include="Unity.InputSystem" Version="1.7.0" />
+    <PackageReference Include="Unity.InputSystem" Version="1.14.2" />
     <PackageReference Include="Unity.Mathematics" Version="1.3.1" />
     <PackageReference Include="Unity.RenderPipelines.Core" Version="14.0.11" />
     <PackageReference Include="Unity.RenderPipelines.Universal" Version="14.0.8" />
     <PackageReference Include="Unity.TextMeshPro" Version="3.0.6" />
     <PackageReference Include="Unity.XR.CoreUtils" Version="2.2.3" />
-    <PackageReference Include="Unity.XR.Interaction.Toolkit" Version="2.5.3" />
-    <PackageReference Include="Unity.XR.Management" Version="4.4.1" />
-    <PackageReference Include="Unity.XR.OpenXR" Version="1.8.2" />
-    <PackageReference Include="UnityEngine.Modules" Version="2022.3.47" IncludeAssets="compile" />
+    <PackageReference Include="Unity.XR.Interaction.Toolkit" Version="3.0.9" />
+    <PackageReference Include="Unity.XR.Management" Version="4.5.3" />
+    <PackageReference Include="Unity.XR.OpenXR" Version="1.15.1" />
+    <PackageReference Include="UnityEngine.Modules" Version="6000.0.59" IncludeAssets="compile" />
     <PackageReference Include="UnityEngine.SpatialTracking" Version="2.1.10" />
     <PackageReference Include="UnityEngine.UI" Version="1.0.0" />
   </ItemGroup>

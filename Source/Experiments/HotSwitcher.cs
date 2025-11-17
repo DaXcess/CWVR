@@ -31,13 +31,13 @@ public class HotSwitcher : MonoBehaviour
     {
         InputPatches.OnCreateInputHandler(InputHandler.Instance);
 
-        FindObjectOfType<GameAPI>().gameObject.AddComponent<MainMenu>();
+        FindFirstObjectByType<GameAPI>().gameObject.AddComponent<MainMenu>();
     }
 
     private void LeftVR()
     {
         InputPatches.OnLeaveVR();
         
-        Destroy(FindObjectOfType<MainMenu>());
+        Destroy(FindFirstObjectByType<MainMenu>());
     }
 }

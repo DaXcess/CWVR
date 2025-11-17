@@ -1,3 +1,7 @@
+# 1.2.0
+
+- Updated for the latest version of Content Warning
+
 # 1.1.4
 
 - Added additional scanning for OpenXR runtimes

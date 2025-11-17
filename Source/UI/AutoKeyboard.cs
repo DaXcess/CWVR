@@ -46,7 +46,7 @@ public class AutoKeyboard : MonoBehaviour
 
     private void PopulateInputs()
     {
-        var inputs = FindObjectsOfType<TMP_InputField>(true);
+        var inputs = FindObjectsByType<TMP_InputField>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
         foreach (var input in inputs)
         {

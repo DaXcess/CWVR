@@ -1,6 +1,7 @@
-using CWVR.Input;
 using CWVR.Player;
 using HarmonyLib;
+using UnityEngine.InputSystem;
+using Zorro.ControllerSupport;
 
 namespace CWVR.Patches.UI;
 
@@ -8,22 +9,28 @@ namespace CWVR.Patches.UI;
 internal static class EscapeMenuPatches
 {
     /// <summary>
+    /// Re-assign the open menu button to our VR remapped action
+    /// </summary>
+    [HarmonyPatch(typeof(EscapeMenu), nameof(EscapeMenu.OnEnable))]
+    [HarmonyPrefix]
+    private static void OnEscapeMenuCreated(EscapeMenu __instance)
+    {
+        var playerInput = InputHandler.Instance.m_playerInput;
+
+        __instance.OpenMenuAction = InputActionReference.Create(playerInput.actions["Player/OpenMenu"]);
+    }
+
+    /// <summary>
     /// Detect and handle opening/closing the pause menu using VR controllers instead of Escape
     /// </summary>
-    [HarmonyPatch(typeof(EscapeMenu), nameof(EscapeMenu.LateUpdate))]
-    [HarmonyPrefix]
-    private static bool OnLateUpdate(EscapeMenu __instance)
+    [HarmonyPatch(typeof(EscapeMenu), nameof(EscapeMenu.Toggle), [])]
+    [HarmonyPostfix]
+    private static void OnToggle(EscapeMenu __instance)
     {
-        if (!Actions.Instance["OpenMenu"].WasPressedThisFrame())
-            return false;
-
-        __instance.Toggle();
         if (__instance.Open)
             VRSession.Instance.HUD.PauseMenu.OnOpen();
         else
             VRSession.Instance.HUD.PauseMenu.OnClose();
-
-        return false;
     }
 
     /// <summary>

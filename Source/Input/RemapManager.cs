@@ -47,9 +47,6 @@ public class RemapManager : MonoBehaviour
     private ControlSettingHeader header;
     private readonly List<RemapBinding> cells = [];
     
-    private SFX_Instance hoverSound;
-    private SFX_Instance clickSound;
-
     private InputActionRebindingExtensions.RebindingOperation currentOperation;
     private RemapBinding currentBinding;
     private float lastRebindTime;
@@ -59,17 +56,11 @@ public class RemapManager : MonoBehaviour
         Instance = this;
         playerInput = InputHandler.Instance.m_playerInput;
         
-        // Grab sound effects from another UI element
-        var button = FindObjectOfType<EscapeMenuButton>();
-
-        hoverSound = button.hoverSound;
-        clickSound = button.clickSound;
-        
         playerInput.onControlsChanged += OnControlsChanged;
-        
+
         // Load binding overrides
         playerInput.actions.LoadBindingOverridesFromJson(Plugin.Config.ControllerBindingsOverride.Value);
-        
+
         ReloadBindings();
     }
 
@@ -82,11 +73,14 @@ public class RemapManager : MonoBehaviour
 
     public void DisplaySettings(Transform container)
     {
+        // Grab sound effects from another UI element
+        var button = FindFirstObjectByType<EscapeMenuButton>();
+
         header = Instantiate(AssetManager.ControlSettingHeaderCell, container).GetComponent<ControlSettingHeader>();
         
         var headerSounds = header.GetComponentInChildren<UI_Sound>();
-        headerSounds.hoverSound = hoverSound;
-        headerSounds.clickSound = clickSound;
+        headerSounds.hoverSound = button.hoverSound;
+        headerSounds.clickSound = button.clickSound;
 
         header.button.onClick.AddListener(ResetBindings);
         
@@ -95,7 +89,7 @@ public class RemapManager : MonoBehaviour
             var component = Instantiate(AssetManager.ControlSettingCell, container)
                 .GetComponent<RemapBinding>();
 
-            component.Setup(remappableControl, hoverSound, clickSound);
+            component.Setup(remappableControl, button.hoverSound, button.clickSound);
             
             cells.Add(component);
         }

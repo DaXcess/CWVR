@@ -13,6 +13,7 @@ internal static class AssetManager
     public static InputActionAsset InputActions;
     public static InputActionAsset DefaultXRActions;
 
+    public static GameObject MenuControllers;
     public static GameObject Keyboard;
     public static GameObject CaptchaKeyboard;
     public static GameObject BooleanSettingCell;
@@ -24,6 +25,8 @@ internal static class AssetManager
     public static RemappableControls RemappableControls;
     
     public static Material WhiteMat;
+
+    public static Shader MirrorView;
 
     public static bool LoadAssets()
     {
@@ -40,7 +43,8 @@ internal static class AssetManager
 
         InputActions = assetBundle.LoadAsset<InputActionAsset>("InputActions");
         DefaultXRActions = assetBundle.LoadAsset<InputActionAsset>("DefaultXRActions");
-        
+
+        MenuControllers = assetBundle.LoadAsset<GameObject>("Menu Controllers");
         Keyboard = assetBundle.LoadAsset<GameObject>("NonNativeKeyboard");
         CaptchaKeyboard = assetBundle.LoadAsset<GameObject>("CaptchaKeyboard");
         BooleanSettingCell = assetBundle.LoadAsset<GameObject>("BooleanSettingCell");
@@ -53,6 +57,8 @@ internal static class AssetManager
             assetBundle.LoadAsset<GameObject>("Remappable Controls").GetComponent<RemappableControls>();
         
         WhiteMat = assetBundle.LoadAsset<Material>("White");
+
+        MirrorView = assetBundle.LoadAsset<Shader>("XRMirrorView");
 
         if (RemappableControls == null || RemappableControls.controls == null)
         {

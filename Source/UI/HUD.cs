@@ -23,7 +23,7 @@ public class HUD : MonoBehaviour
     {
         var rigRoot = global::Player.localPlayer.refs.rigRoot.transform;
 
-        var ui = FindObjectOfType<UserInterface>();
+        var ui = FindFirstObjectByType<UserInterface>();
         var leftHand = rigRoot.Find("Rig/Armature/Hip/Torso/Arm_L/Elbow_L/Hand_L");
         var rightHand = rigRoot.Find("Rig/Armature/Hip/Torso/Arm_R/Elbow_R/Hand_R");
         var uiSource = ui.transform.Find("Pivot/Others");
@@ -140,7 +140,7 @@ public class HUD : MonoBehaviour
         PauseMenu = EscapeMenu.Instance.m_menu.gameObject.AddComponent<PauseMenu>();
         
         // Player Customizer (if applicable)
-        FindObjectOfType<PlayerCustomizer>()?.gameObject.AddComponent<Customizer>();
+        FindFirstObjectByType<PlayerCustomizer>()?.gameObject.AddComponent<Customizer>();
         
         ReplaceCurvedUISettings(interactionUi, stamina, oxygen, health, statusBar, hotbar);
         CreateUICamera();

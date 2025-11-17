@@ -388,7 +388,7 @@ internal static class OpenXR
             xrGeneralSettings.Start();
 
             var displays = new List<XRDisplaySubsystem>();
-            SubsystemManager.GetInstances(displays);
+            SubsystemManager.GetSubsystems(displays);
 
             if (Plugin.Config.EnableVerboseLogging.Value)
             {

@@ -13,78 +13,68 @@ public class Config(ConfigFile file) : IConfig
 
     // General configuration
 
-    public IConfigEntry<bool> DisableVR { get; } = new WrappedConfigEntry<bool>(file.Bind("General", "DisableVR", false,
-        "Disables the main functionality of this mod, can be used if you want to play without VR while keeping the mod installed."));
+    public IConfigEntry<bool> DisableVR { get; } = file.BindWrapped("General", "DisableVR", false,
+        "Disables the main functionality of this mod, can be used if you want to play without VR while keeping the mod installed.");
 
-    public IConfigEntry<bool> DisableRagdollCamera { get; } = new WrappedConfigEntry<bool>(
-        file.Bind("General", "DisableRagdollCamera", false, "Disable if coward"));
+    public IConfigEntry<bool> DisableRagdollCamera { get; } =
+        file.BindWrapped("General", "DisableRagdollCamera", false, "Disable if coward");
 
-    public IConfigEntry<bool> EnableVerboseLogging { get; } =
-        new WrappedConfigEntry<bool>(file.Bind("General", "EnableVerboseLogging", false,
-            "Enables verbose debug logging during OpenXR initialization"));
+    public IConfigEntry<bool> EnableVerboseLogging { get; } = file.BindWrapped("General", "EnableVerboseLogging", false,
+        "Enables verbose debug logging during OpenXR initialization");
     
     // Graphics configuration
 
-    public IConfigEntry<float> RenderScale { get; } = new WrappedConfigEntry<float>(file.Bind("Graphics",
-        "RenderScale", 1f,
+    public IConfigEntry<float> RenderScale { get; } = file.BindWrapped("Graphics", "RenderScale", 1f,
         new ConfigDescription(
             "The resolution scale to render the game in. Lower values mean more performance, at the cost of quality.",
-            new AcceptableValueRange<float>(0.1f, 2))));
+            new AcceptableValueRange<float>(0.1f, 2)));
 
-    public IConfigEntry<UpscalingFilterSelection> UpscalingFilter { get; } =
-        new WrappedConfigEntry<UpscalingFilterSelection>(file.Bind("Graphics", "UpscalingFilter",
-            UpscalingFilterSelection.Auto,
-            new ConfigDescription(
-                "The filter to use to perform upscaling back to native resolution. Is only used if the render scale is lower than 1.",
-                new AcceptableValueEnum<UpscalingFilterSelection>())));
+    public IConfigEntry<UpscalingFilterSelection> UpscalingFilter { get; } = file.BindWrapped("Graphics",
+        "UpscalingFilter", UpscalingFilterSelection.Auto,
+        new ConfigDescription(
+            "The filter to use to perform upscaling back to native resolution. Is only used if the render scale is lower than 1.",
+            new AcceptableValueEnum<UpscalingFilterSelection>()));
 
-    public IConfigEntry<bool> EnableOcclusionMesh { get; } =
-        new WrappedConfigEntry<bool>(file.Bind("Graphics", "EnableOcclusionMesh", true,
-            "The occlusion mesh will cause the game to stop rendering pixels outside of the lens' views, which increases performance."));
+    public IConfigEntry<bool> EnableOcclusionMesh { get; } = file.BindWrapped("Graphics", "EnableOcclusionMesh", true,
+        "The occlusion mesh will cause the game to stop rendering pixels outside of the lens' views, which increases performance.");
 
     // Input configuration
 
-    public IConfigEntry<IConfig.TurnProviderOption> TurnProvider { get; } =
-        new WrappedConfigEntry<IConfig.TurnProviderOption>(file.Bind("Input",
-            "TurnProvider",
-            IConfig.TurnProviderOption.Smooth,
-            new ConfigDescription("Specify which turning provider your player uses, if any.",
-                new AcceptableValueEnum<IConfig.TurnProviderOption>())));
+    public IConfigEntry<IConfig.TurnProviderOption> TurnProvider { get; } = file.BindWrapped("Input", "TurnProvider",
+        IConfig.TurnProviderOption.Smooth,
+        new ConfigDescription("Specify which turning provider your player uses, if any.",
+            new AcceptableValueEnum<IConfig.TurnProviderOption>()));
 
-    public IConfigEntry<float> SmoothTurnSpeedModifier { get; } = new WrappedConfigEntry<float>(file.Bind("Input",
-        "SmoothTurnSpeedModifier", 1f,
+    public IConfigEntry<float> SmoothTurnSpeedModifier { get; } = file.BindWrapped("Input", "SmoothTurnSpeedModifier",
+        1f,
         new ConfigDescription(
             "A multiplier that is added to the smooth turning speed. Requires turn provider to be set to smooth.",
-            new AcceptableValueRange<float>(0.25f, 5))));
+            new AcceptableValueRange<float>(0.25f, 5)));
 
-    public IConfigEntry<int> SnapTurnSize { get; } = new WrappedConfigEntry<int>(file.Bind("Input", "SnapTurnSize", 45,
+    public IConfigEntry<int> SnapTurnSize { get; } = file.BindWrapped("Input", "SnapTurnSize", 45,
         new ConfigDescription(
             "The amount of rotation that is applied when performing a snap turn. Requires turn provider to be set to snap.",
-            new AcceptableValueRange<int>(10, 180))));
+            new AcceptableValueRange<int>(10, 180)));
 
-    public IConfigEntry<IConfig.SprintActivationMode> SprintActivation { get; } =
-        new WrappedConfigEntry<IConfig.SprintActivationMode>(file.Bind("Input", nameof(SprintActivation),
-            IConfig.SprintActivationMode.Press,
-            new ConfigDescription(
-                "Determines the way sprint should be used: whether you need to hold the button, or only press it once.",
-                new AcceptableValueEnum<IConfig.SprintActivationMode>())));
+    public IConfigEntry<IConfig.SprintActivationMode> SprintActivation { get; } = file.BindWrapped("Input",
+        nameof(SprintActivation), IConfig.SprintActivationMode.Press,
+        new ConfigDescription(
+            "Determines the way sprint should be used: whether you need to hold the button, or only press it once.",
+            new AcceptableValueEnum<IConfig.SprintActivationMode>()));
 
-    public IConfigEntry<bool> InteractToZoom { get; } = new WrappedConfigEntry<bool>(file.Bind("Input",
-        "InteractToZoom", true,
-        "Require holding the interact button to zoom the camera. Removes the need to hold interact to swap items."));
+    public IConfigEntry<bool> InteractToZoom { get; } = file.BindWrapped("Input", "InteractToZoom", true,
+        "Require holding the interact button to zoom the camera. Removes the need to hold interact to swap items.");
 
     // Internal configuration
 
-    public IConfigEntry<bool> FirstTimeLaunch { get; } = new WrappedConfigEntry<bool>(file.Bind("Internal",
-        "FirstTimeLaunch", true,
-        "Keeps track if the game was launched in VR before. For internal use only."));
+    public IConfigEntry<bool> FirstTimeLaunch { get; } = file.BindWrapped("Internal", "FirstTimeLaunch", true,
+        "Keeps track if the game was launched in VR before. For internal use only.");
 
-    public IConfigEntry<string> OpenXRRuntimeFile { get; } = new WrappedConfigEntry<string>(file.Bind("Internal",
-        "OpenXRRuntimeFile", "",
-        "Overrides the OpenXR plugin to use a specific json file. For internal use only."));
+    public IConfigEntry<string> OpenXRRuntimeFile { get; } = file.BindWrapped("Internal", "OpenXRRuntimeFile", "",
+        "Overrides the OpenXR plugin to use a specific json file. For internal use only.");
 
-    public IConfigEntry<string> ControllerBindingsOverride { get; } = new WrappedConfigEntry<string>(
-        file.Bind("Internal", "CustomControls", "", "The custom control schema to use"));
+    public IConfigEntry<string> ControllerBindingsOverride { get; } =
+        file.BindWrapped("Internal", "CustomControls", "", "The custom control schema to use");
     
     // Event Handlers
 
@@ -101,7 +91,7 @@ public class Config(ConfigFile file) : IConfig
     }
 }
 
-public class WrappedConfigEntry<T>(ConfigEntry<T> entry) : IConfigEntry<T>
+public class BepInConfigEntry<T>(ConfigEntry<T> entry) : IConfigEntry<T>
 {
     public T Value
     {
@@ -118,4 +108,18 @@ internal class AcceptableValueEnum<T>() : AcceptableValueBase(typeof(T))
     public override object Clamp(object value) => value;
     public override bool IsValid(object value) => true;
     public override string ToDescriptionString() => $"# Acceptable values: {string.Join(", ", names)}";
+}
+
+internal static class BepInConfigEntryExtensions
+{
+    public static BepInConfigEntry<T> BindWrapped<T>(this ConfigFile file, string section, string key, T defaultValue,
+        ConfigDescription configDescription = null)
+    {
+        return new BepInConfigEntry<T>(file.Bind(section, key, defaultValue, configDescription));
+    }
+
+    public static BepInConfigEntry<T> BindWrapped<T>(this ConfigFile file, string section, string key, T defaultValue, string description)
+    {
+        return new BepInConfigEntry<T>(file.Bind(section, key, defaultValue, description));
+    }
 }

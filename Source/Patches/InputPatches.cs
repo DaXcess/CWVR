@@ -23,13 +23,16 @@ internal static class InputPatches
         var playerInput = __instance.m_playerInput;
 
         originalActions = playerInput.actions;
-        
+
+        // We have to set these two values to make sure the `actions` assignment doesn't make a copy which breaks rebinding
+        playerInput.enabled = false;
+        playerInput.m_Actions = null;
+
         playerInput.actions = AssetManager.InputActions;
         playerInput.defaultActionMap = "Player";
         playerInput.neverAutoSwitchControlSchemes = false;
         playerInput.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
 
-        playerInput.enabled = false;
         playerInput.enabled = true;
 
         __instance.gameObject.AddComponent<RemapManager>();
@@ -43,9 +46,11 @@ internal static class InputPatches
         var playerInput = InputHandler.Instance.m_playerInput;
         
         Object.Destroy(InputHandler.Instance.GetComponent<RemapManager>());
-        
-        playerInput.actions = originalActions;
+
         playerInput.enabled = false;
+        playerInput.m_Actions = null;
+
+        playerInput.actions = originalActions;
         playerInput.enabled = true;
     }
 

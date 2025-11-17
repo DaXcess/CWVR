@@ -1,8 +1,11 @@
 using System;
 using System.Text;
+using CWVR.Assets;
 using CWVR.Patches;
 using CWVR.Player;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 using UnityEngine.SpatialTracking;
 
 namespace CWVR;
@@ -78,5 +81,13 @@ internal static class Utils
     public static void EnqueueModal(string title, string body, ModalOption[] options = null, Action onClosed = null)
     {
         Enqueue(() => Modal.Show(title, body, options ?? [new ModalOption("Ok")], onClosed));
+    }
+
+    public static void SetupOrReplaceXRMirrorShader()
+    {
+        if (XRSystem.s_MirrorViewMaterial != null)
+            CoreUtils.Destroy(XRSystem.s_MirrorViewMaterial);
+
+        XRSystem.s_MirrorViewMaterial = CoreUtils.CreateEngineMaterial(AssetManager.MirrorView);
     }
 }

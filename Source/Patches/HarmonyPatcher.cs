@@ -26,7 +26,7 @@ internal static class HarmonyPatcher
 
     private static void Patch(this Harmony patcher, CWVRPatchTarget target)
     {
-        AccessTools.GetTypesFromAssembly(Assembly.GetExecutingAssembly()).Do((type) =>
+        AccessTools.GetTypesFromAssembly(Assembly.GetExecutingAssembly()).Do(type =>
         {
             try
             {
@@ -37,14 +37,18 @@ internal static class HarmonyPatcher
                 if (attribute.Target != target)
                     return;
 
-                if (attribute.Loader == LoaderTarget.Both ||
-                    (attribute.Loader == LoaderTarget.BepInEx && Plugin.Loader == Loader.BepInEx) ||
-                    (attribute.Loader == LoaderTarget.Native && Plugin.Loader == Loader.Native))
-                    patcher.CreateClassProcessor(type, true).Patch();
+                if (!(attribute.Loader == LoaderTarget.Both ||
+                      (attribute.Loader == LoaderTarget.BepInEx && Plugin.Loader == Loader.BepInEx) ||
+                      (attribute.Loader == LoaderTarget.Native && Plugin.Loader == Loader.Native)))
+                    return;
+
+                Logger.LogDebug($"Applying patches from: {type.FullName}");
+
+                patcher.CreateClassProcessor(type, true).Patch();
             }
             catch (Exception e)
             {
-                Logger.LogError($"Failed to apply patches from {type}: {e.Message}");
+                Logger.LogError($"Failed to apply patches from {type}: {e.Message}, {e.InnerException}");
             }
         });
     }

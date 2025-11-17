@@ -7,6 +7,7 @@ using System.Reflection;
 using CWVR.Assets;
 using CWVR.MultiLoader.Common;
 using CWVR.Patches;
+using Unity.Burst.LowLevel;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using ILogger = CWVR.MultiLoader.Common.ILogger;
@@ -17,7 +18,7 @@ public static class Plugin
 {
     public const string PLUGIN_GUID = "io.daxcess.cwvr";
     public const string PLUGIN_NAME = "CWVR";
-    public const string PLUGIN_VERSION = "1.1.4";
+    public const string PLUGIN_VERSION = "1.2.0";
 
     private const string BANNER =
         "                             ,--.,--.                         \n ,-----.,--.   ,--.         /  //  /     ,--.   ,--.,------.  \n'  .--./|  |   |  |        /  //  /       \\  `.'  / |  .--. ' \n|  |    |  |.'.|  |       /  //  /         \\     /  |  '--'.' \n'  '--'\\|   ,'.   |      /  //  /           \\   /   |  |\\  \\  \n `-----''--'   '--'     /  //  /             `-'    `--' '--' \n                       `--'`--'                               \n\n             ___________________________ \n            < Another VR mod by DaXcess >\n             --------------------------- \n                    \\   ^__^\n                     \\  (oo)\\_______\n                        (__)\\       )\\/\\\n                            ||----w |\n                            ||     ||\n";
@@ -34,15 +35,15 @@ public static class Plugin
     {
         var modRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         var runtimeDeps = Path.Combine(modRoot, "RuntimeDeps");
-        
+
         // Force load assemblies required by CWVR
-        
+
         foreach (var file in Directory.GetFiles(runtimeDeps, "*.dll"))
         {
             var filename = Path.GetFileName(file);
 
             // Ignore known unmanaged libraries
-            if (filename is "UnityOpenXR.dll" or "openxr_loader.dll")
+            if (filename is "UnityOpenXR.dll" or "openxr_loader.dll" or "lib_burst_generated.dll")
                 continue;
 
             Logger.LogDebug($"Early loading {filename}");
@@ -57,30 +58,39 @@ public static class Plugin
             }
         }
     }
-    
+
     public static void InitializePlugin()
     {
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
         InputSystem.PerformDefaultPluginInitialization();
-        
+
         foreach (var line in BANNER.Split('\n'))
             Logger.LogInfo($"   {line}");
 
         var disableVr = Config.DisableVR.Value || Environment.GetCommandLineArgs()
             .Contains("--disable-vr", StringComparer.InvariantCultureIgnoreCase);
-        
+
         if (disableVr)
             Logger.LogWarning("VR has been disabled by config or the `--disable-vr` command line flag");
-        
+
+        if (!LoadBurstLibrary())
+        {
+            Logger.LogError("Disabling mod because required Burst optimizations could not be loaded!");
+            return;
+        }
+
         if (!AssetManager.LoadAssets())
         {
             Logger.LogError("Disabling mod because assets could not be loaded!");
             return;
         }
 
+        // The built-in mirror view shader is broken in this version for some reason (maybe optimized to no-op)
+        Utils.SetupOrReplaceXRMirrorShader();
+
         HarmonyPatcher.PatchUniversal();
         Logger.LogInfo("Inserted Universal patches using Harmony");
-        
+
         if (disableVr || !InitializeVR())
             return;
 
@@ -95,16 +105,25 @@ public static class Plugin
         {
             OpenXR.Loader.DeinitializeXR();
             HarmonyPatcher.UnpatchVR();
-            
+
             Flags &= ~Flags.VR;
         }
         else
         {
             if (!InitializeVR())
                 return;
-            
+
             Flags |= Flags.VR;
         }
+    }
+
+    private static bool LoadBurstLibrary()
+    {
+        var modRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var runtimeDeps = Path.Combine(modRoot, "RuntimeDeps");
+        var burstLibrary = Path.Combine(runtimeDeps, "lib_burst_generated.dll");
+
+        return File.Exists(burstLibrary) && BurstCompilerService.LoadBurstLibrary(burstLibrary);
     }
 
     private static bool InitializeVR()
@@ -119,8 +138,8 @@ public static class Plugin
             Utils.EnqueueModal("VR startup failed",
                 "Something went wrong and we weren't able to launch the game in VR.\nIf you want to play without VR, it is recommended to disable VR completely by pressing the button below.\nIf you need help troubleshooting, grab a copy of the logs, which you can open using the button below.",
                 [
-                    new ModalOption("Disable VR", () => Config.DisableVR.Value = true), new ModalOption("Open Logs",
-                        () => Process.Start("notepad.exe", Application.consoleLogPath)),
+                    new ModalOption("Disable VR", () => Config.DisableVR.Value = true),
+                    new ModalOption("Open Logs", () => Process.Start("notepad.exe", Application.consoleLogPath)),
                     new ModalOption("Continue")
                 ]);
 
@@ -134,9 +153,9 @@ public static class Plugin
             Logger.LogWarning("Could not get OpenXR Runtime info?");
 
         HarmonyPatcher.PatchVR();
-        
+
         Logger.LogDebug("Inserted VR patches using Harmony");
-        
+
         return true;
     }
 }
