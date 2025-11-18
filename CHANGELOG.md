@@ -2,6 +2,7 @@
 
 - Updated for the latest version of Content Warning
 - Removed Workshop support in favor of Thunderstore/BepInEx
+- Due to FPTS not being used by other mods, it is now bundled with the VR mod
 
 # 1.1.4
 
