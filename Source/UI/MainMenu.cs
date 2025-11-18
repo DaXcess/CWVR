@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using CWVR.Assets;
 using CWVR.Input;
@@ -8,12 +7,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.InputSystem.XR;
-using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.XR;
-using UnityEngine.XR.Interaction.Toolkit;
-using UnityEngine.XR.Interaction.Toolkit.Interactors;
-using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 
 namespace CWVR.UI;
@@ -46,7 +40,7 @@ public class MainMenu : MonoBehaviour
         FindFirstObjectByType<InputSystemUIInputModule>().enabled = false;
 
         // Set up canvasses
-        // TODO: This doesn't work with Hotswap
+        // TODO: This doesn't work with Hotswap... maybe?
         var introCanvas = FindFirstObjectByType<IntroScreenAnimator>(FindObjectsInactive.Include).GetComponent<Canvas>();
         var mainMenuCanvas = MainMenuHandler.Instance.UIHandler.GetComponent<Canvas>();
         var modalCanvas = Modal.Instance.GetComponent<Canvas>();

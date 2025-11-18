@@ -1,29 +1,33 @@
+using BepInEx.Logging;
+
 namespace CWVR;
 
 public static class Logger
 {
+    internal static ManualLogSource source;
+
     public static void Log(object message)
     {
-        Plugin.Logger.Log(message);
+        source?.LogInfo(message);
     }
 
     public static void LogInfo(object message)
     {
-        Plugin.Logger.LogInfo(message);
+        source?.LogInfo(message);
     }
 
     public static void LogWarning(object message)
     {
-        Plugin.Logger.LogWarning(message);
+        source?.LogWarning(message);
     }
 
     public static void LogError(object message)
     {
-        Plugin.Logger.LogError(message);
+        source?.LogError(message);
     }
 
     public static void LogDebug(object message)
     {
-        Plugin.Logger.LogDebug(message);
+        source?.LogDebug(message);
     }
 }

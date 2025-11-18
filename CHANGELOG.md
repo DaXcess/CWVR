@@ -1,6 +1,7 @@
 # 1.2.0
 
 - Updated for the latest version of Content Warning
+- Removed Workshop support in favor of Thunderstore/BepInEx
 
 # 1.1.4
 

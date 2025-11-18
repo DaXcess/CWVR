@@ -1,6 +1,5 @@
 using CWVR.Assets;
 using CWVR.Input;
-using CWVR.MultiLoader.Common;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -99,7 +98,7 @@ internal static class InputPatches
     {
         var canTakeInput = GlobalInputHandler.CanTakeInput();
 
-        if (Plugin.Config.SprintActivation.Value == IConfig.SprintActivationMode.Hold)
+        if (Plugin.Config.SprintActivation.Value == SprintActivationMode.Hold)
         {
             __instance.sprintIsPressed =
                 canTakeInput && __instance.sprintAction.action.IsPressed();

@@ -1,6 +1,5 @@
 using System;
 using CWVR.Input;
-using CWVR.MultiLoader.Common;
 using UnityEngine;
 
 namespace CWVR.Player;
@@ -98,7 +97,7 @@ public class VRPlayer : MonoBehaviour
         
         switch (Plugin.Config.TurnProvider.Value)
         {
-            case IConfig.TurnProviderOption.Snap:
+            case TurnProviderOption.Snap:
                 var value = Actions.Instance["Turn"].ReadValue<float>();
                 var should = MathF.Abs(value) > 0.75;
 
@@ -112,12 +111,12 @@ public class VRPlayer : MonoBehaviour
 
                 break;
 
-            case IConfig.TurnProviderOption.Smooth:
+            case TurnProviderOption.Smooth:
                 Rig.AddRotation(180 * Time.deltaTime * Plugin.Config.SmoothTurnSpeedModifier.Value *
                                 Actions.Instance["Turn"].ReadValue<float>());
                 break;
 
-            case IConfig.TurnProviderOption.Disabled:
+            case TurnProviderOption.Disabled:
             default:
                 break;
         }

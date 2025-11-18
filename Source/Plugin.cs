@@ -4,17 +4,18 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using BepInEx;
 using CWVR.Assets;
-using CWVR.MultiLoader.Common;
 using CWVR.Patches;
 using Unity.Burst.LowLevel;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using ILogger = CWVR.MultiLoader.Common.ILogger;
 
 namespace CWVR;
 
-public static class Plugin
+[ContentWarningPlugin(PLUGIN_GUID, PLUGIN_VERSION, true)]
+[BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
+public class Plugin : BaseUnityPlugin
 {
     public const string PLUGIN_GUID = "io.daxcess.cwvr";
     public const string PLUGIN_NAME = "CWVR";
@@ -23,55 +24,34 @@ public static class Plugin
     private const string BANNER =
         "                             ,--.,--.                         \n ,-----.,--.   ,--.         /  //  /     ,--.   ,--.,------.  \n'  .--./|  |   |  |        /  //  /       \\  `.'  / |  .--. ' \n|  |    |  |.'.|  |       /  //  /         \\     /  |  '--'.' \n'  '--'\\|   ,'.   |      /  //  /           \\   /   |  |\\  \\  \n `-----''--'   '--'     /  //  /             `-'    `--' '--' \n                       `--'`--'                               \n\n             ___________________________ \n            < Another VR mod by DaXcess >\n             --------------------------- \n                    \\   ^__^\n                     \\  (oo)\\_______\n                        (__)\\       )\\/\\\n                            ||----w |\n                            ||     ||\n";
 
-    public static ILogger Logger { get; set; }
-    public static IConfig Config { get; set; }
+    public new static Config Config { get; set; }
     public static Flags Flags { get; set; } = 0;
-    public static Loader Loader { get; set; }
 
-    /// <summary>
-    /// Prepare CWVR for use within Content Warning using their modding framework
-    /// </summary>
-    public static void SetupEarlyDependencies()
-    {
-        var modRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        var runtimeDeps = Path.Combine(modRoot, "RuntimeDeps");
-
-        // Force load assemblies required by CWVR
-
-        foreach (var file in Directory.GetFiles(runtimeDeps, "*.dll"))
-        {
-            var filename = Path.GetFileName(file);
-
-            // Ignore known unmanaged libraries
-            if (filename is "UnityOpenXR.dll" or "openxr_loader.dll" or "lib_burst_generated.dll")
-                continue;
-
-            Logger.LogDebug($"Early loading {filename}");
-
-            try
-            {
-                Assembly.LoadFile(file);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning($"Failed to early load {filename}: {ex.Message}");
-            }
-        }
-    }
-
-    public static void InitializePlugin()
+    private void Awake()
     {
         CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
         InputSystem.PerformDefaultPluginInitialization();
 
+        CWVR.Logger.source = Logger;
+
+        Config = new Config(base.Config);
+        base.Config.SettingChanged += (_, _) => Config.ApplySettings();
+
         foreach (var line in BANNER.Split('\n'))
             Logger.LogInfo($"   {line}");
 
+        // Allow disabling VR via config and command line
         var disableVr = Config.DisableVR.Value || Environment.GetCommandLineArgs()
             .Contains("--disable-vr", StringComparer.InvariantCultureIgnoreCase);
 
         if (disableVr)
             Logger.LogWarning("VR has been disabled by config or the `--disable-vr` command line flag");
+
+        if (!PreloadRuntimeDependencies())
+        {
+            Logger.LogError("Disabling mod because required runtime dependencies could not be loaded!");
+            return;
+        }
 
         if (!LoadBurstLibrary())
         {
@@ -91,12 +71,45 @@ public static class Plugin
         HarmonyPatcher.PatchUniversal();
         Logger.LogInfo("Inserted Universal patches using Harmony");
 
-        if (disableVr || !InitializeVR())
-            return;
+        if (!disableVr || InitializeVR())
+            Flags |= Flags.VR;
 
-        // Perform global VR setup here
+        Utils.Enqueue(() => Config.ApplySettings());
+    }
 
-        Flags |= Flags.VR;
+    private bool PreloadRuntimeDependencies()
+    {
+        try
+        {
+            var deps = Path.Combine(Path.GetDirectoryName(Info.Location)!, "RuntimeDeps");
+
+            foreach (var file in Directory.GetFiles(deps, "*.dll"))
+            {
+                var filename = Path.GetFileName(file);
+
+                // Ignore known unmanaged libraries
+                if (filename is "lib_burst_generated.dll")
+                    continue;
+
+                try
+                {
+                    Assembly.LoadFile(file);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWarning($"Failed to preload '{filename}': {ex.Message}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(
+                $"Unexpected error occured while preloading runtime dependencies (incorrect folder structure?): {ex.Message}");
+
+            return false;
+        }
+
+        return true;
     }
 
     public static void ToggleVR()
@@ -128,12 +141,12 @@ public static class Plugin
 
     private static bool InitializeVR()
     {
-        Logger.LogInfo("Loading VR...");
+        CWVR.Logger.LogInfo("Loading VR...");
 
         if (!OpenXR.Loader.InitializeXR())
         {
-            Logger.LogError("Failed to start in VR Mode! Only Non-VR features are available!");
-            Logger.LogWarning("If your intention is to play without VR, you can ignore the previous error.");
+            CWVR.Logger.LogError("Failed to start in VR Mode! Only Non-VR features are available!");
+            CWVR.Logger.LogWarning("If your intention is to play without VR, you can ignore the previous error.");
 
             Utils.EnqueueModal("VR startup failed",
                 "Something went wrong and we weren't able to launch the game in VR.\nIf you want to play without VR, it is recommended to disable VR completely by pressing the button below.\nIf you need help troubleshooting, grab a copy of the logs, which you can open using the button below.",
@@ -148,13 +161,13 @@ public static class Plugin
 
         if (OpenXR.GetActiveRuntimeName(out var name) &&
             OpenXR.GetActiveRuntimeVersion(out var major, out var minor, out var patch))
-            Logger.LogInfo($"OpenXR Runtime being used: {name} ({major}.{minor}.{patch})");
+            CWVR.Logger.LogInfo($"OpenXR Runtime being used: {name} ({major}.{minor}.{patch})");
         else
-            Logger.LogWarning("Could not get OpenXR Runtime info?");
+            CWVR.Logger.LogWarning("Could not get OpenXR Runtime info?");
 
         HarmonyPatcher.PatchVR();
 
-        Logger.LogDebug("Inserted VR patches using Harmony");
+        CWVR.Logger.LogDebug("Inserted VR patches using Harmony");
 
         return true;
     }
@@ -164,10 +177,4 @@ public static class Plugin
 public enum Flags
 {
     VR = 1 << 0,
-}
-
-public enum Loader
-{
-    BepInEx,
-    Native
 }

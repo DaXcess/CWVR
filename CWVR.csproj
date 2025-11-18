@@ -13,7 +13,6 @@
     <RepositoryUrl>https://github.com/DaXcess/CWVR</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <DefineConstants>BEPINEX;NATIVE</DefineConstants>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
 
@@ -57,9 +56,5 @@
 
   <ItemGroup>
     <EmbeddedResource Remove="Preload\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>

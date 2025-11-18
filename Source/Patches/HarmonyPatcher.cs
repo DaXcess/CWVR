@@ -37,11 +37,6 @@ internal static class HarmonyPatcher
                 if (attribute.Target != target)
                     return;
 
-                if (!(attribute.Loader == LoaderTarget.Both ||
-                      (attribute.Loader == LoaderTarget.BepInEx && Plugin.Loader == Loader.BepInEx) ||
-                      (attribute.Loader == LoaderTarget.Native && Plugin.Loader == Loader.Native)))
-                    return;
-
                 Logger.LogDebug($"Applying patches from: {type.FullName}");
 
                 patcher.CreateClassProcessor(type, true).Patch();
@@ -55,22 +50,13 @@ internal static class HarmonyPatcher
 }
 
 internal class CWVRPatchAttribute(
-    CWVRPatchTarget target = CWVRPatchTarget.VROnly,
-    LoaderTarget loader = LoaderTarget.Both) : Attribute
+    CWVRPatchTarget target = CWVRPatchTarget.VROnly) : Attribute
 {
     public CWVRPatchTarget Target { get; } = target;
-    public LoaderTarget Loader { get; } = loader;
 }
 
 internal enum CWVRPatchTarget
 {
     Universal,
     VROnly
-}
-
-internal enum LoaderTarget
-{
-    BepInEx,
-    Native,
-    Both
 }
