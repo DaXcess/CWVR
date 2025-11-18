@@ -53,8 +53,8 @@ jobs:
           gpg --output ./package/BepInEx/plugins/CWVR/CWVR.dll.sig --detach-sig ./package/BepInEx/plugins/CWVR/CWVR.dll
           gpg --output ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll.sig --detach-sig ./package/BepInEx/patchers/CWVR/CWVR.Preload.dll
 
-          # Copy assets
-          cp ./package/contentwarningvr ./package/BepInEx/plugins/CWVR/contentwarningvr
+          # Move assets
+          mv ./package/contentwarningvr ./package/BepInEx/plugins/CWVR/contentwarningvr
 
           # Copy docs and license
           cp CHANGELOG.md ./package/CHANGELOG.md
