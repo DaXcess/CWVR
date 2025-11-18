@@ -71,7 +71,7 @@ public class Plugin : BaseUnityPlugin
         HarmonyPatcher.PatchUniversal();
         Logger.LogInfo("Inserted Universal patches using Harmony");
 
-        if (!disableVr || InitializeVR())
+        if (!disableVr && InitializeVR())
             Flags |= Flags.VR;
 
         Utils.Enqueue(() => Config.ApplySettings());

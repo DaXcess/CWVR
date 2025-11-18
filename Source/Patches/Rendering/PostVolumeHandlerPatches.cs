@@ -18,6 +18,13 @@ internal static class PostVolumeHandlerPatches
         __instance.StartCoroutine(delayedFixPixelNormals(__instance));
     }
 
+    [HarmonyPatch(typeof(PostVolumeHandler), nameof(PostVolumeHandler.LateUpdate))]
+    [HarmonyPostfix]
+    private static void OnUpdatePostVolume(PostVolumeHandler __instance)
+    {
+        __instance.m_edgeDetectionSetting.Value = __instance.m_hbao.active ? 1 : 0;
+    }
+
     private static IEnumerator delayedFixPixelNormals(PostVolumeHandler pvh)
     {
         yield return new WaitUntil(() => pvh.m_hbao is not null);
