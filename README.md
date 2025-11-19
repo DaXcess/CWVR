@@ -4,8 +4,6 @@
 [![GitHub Version](https://img.shields.io/github/v/release/DaXcess/CWVR?style=for-the-badge&logo=github)](https://github.com/DaXcess/CWVR/releases/latest)
 [![Thunderstore Downloads](https://img.shields.io/thunderstore/dt/DaXcess/CWVR?style=for-the-badge&logo=thunderstore&logoColor=white)](https://thunderstore.io/c/content-warning/p/DaXcess/CWVR)
 [![GitHub Downloads](https://img.shields.io/github/downloads/DaXcess/CWVR/total?style=for-the-badge&logo=github)](https://github.com/DaXcess/CWVR/releases/latest)
-[![Steam Downloads](https://img.shields.io/steam/downloads/3392710007?style=for-the-badge&logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3392710007)
-[![Steam Subscriptions](https://img.shields.io/steam/subscriptions/3392710007?style=for-the-badge&logo=steam)](https://steamcommunity.com/sharedfiles/filedetails/?id=3392710007)
 <br/>
 [![Release Build](https://img.shields.io/github/actions/workflow/status/DaXcess/CWVR/build-release.yaml?branch=main&style=for-the-badge&label=RELEASE)](https://github.com/DaXcess/CWVR/actions/workflows/build-release.yaml)
 [![Debug Build](https://img.shields.io/github/actions/workflow/status/DaXcess/CWVR/build-debug.yaml?branch=dev&style=for-the-badge&label=DEBUG)](https://github.com/DaXcess/CWVR/actions/workflows/build-debug.yaml)
